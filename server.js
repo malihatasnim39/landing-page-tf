@@ -10,6 +10,7 @@ const adminEmail = process.env.ADMIN_EMAIL || "tech@terrafuse.com.au";
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseTable = process.env.SUPABASE_LEADS_TABLE || "building_review_enquiries";
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
 const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM || "TerraFuse <noreply@terrafuse.com.au>";
 const configuredEventName = process.env.EVENT_NAME;
@@ -170,6 +171,20 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function parseEmailSender(value) {
+  const sender = cleanString(value, 254);
+  const match = sender.match(/^(.*?)\s*<([^>]+)>$/);
+
+  if (!match) {
+    return { email: sender };
+  }
+
+  return {
+    email: match[2].trim(),
+    name: match[1].trim().replace(/^"|"$/g, "")
+  };
+}
+
 function leadSummaryText(lead) {
   return [
     `Event: ${lead.event_name}`,
@@ -212,32 +227,51 @@ function leadSummaryHtml(lead) {
 }
 
 async function sendEmail({ to, subject, text, html }) {
-  if (!resendApiKey) {
-    console.warn("RESEND_API_KEY is not configured; skipping email send.");
+  let result;
+
+  if (sendgridApiKey) {
+    result = await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${sendgridApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: parseEmailSender(emailFrom),
+        subject,
+        content: [
+          { type: "text/plain", value: text },
+          { type: "text/html", value: html }
+        ]
+      })
+    });
+  } else if (resendApiKey) {
+    result = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: emailFrom,
+        to,
+        subject,
+        text,
+        html
+      })
+    });
+  } else {
+    console.warn("No email API key is configured; skipping email send.");
     return null;
   }
-
-  const result = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      from: emailFrom,
-      to,
-      subject,
-      text,
-      html
-    })
-  });
 
   if (!result.ok) {
     const detail = await result.text();
     throw new Error(`Email send failed: ${detail}`);
   }
 
-  return result.json();
+  return result.status === 202 || result.status === 204 ? null : result.json();
 }
 
 async function sendLeadEmails(lead) {
@@ -327,7 +361,7 @@ const server = http.createServer((request, response) => {
   }
 
   if (pathname.startsWith("/images/")) {
-    const filePath = safeJoin(root, pathname);
+    const filePath = safeJoin(publicDir, pathname);
     if (filePath) {
       sendFile(response, filePath);
       return;
@@ -335,7 +369,7 @@ const server = http.createServer((request, response) => {
   }
 
   if (pathname.startsWith("/videos/")) {
-    const filePath = safeJoin(root, pathname);
+    const filePath = safeJoin(publicDir, pathname);
     if (filePath) {
       sendFile(response, filePath);
       return;

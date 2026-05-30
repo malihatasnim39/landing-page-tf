@@ -5,8 +5,6 @@ WORKDIR /app
 COPY package.json ./
 COPY server.js ./
 COPY public ./public
-COPY images ./images
-COPY videos ./videos
 
 ENV NODE_ENV=production
 ENV PORT=8080
