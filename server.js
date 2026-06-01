@@ -13,6 +13,8 @@ const supabaseTable = process.env.SUPABASE_LEADS_TABLE || "building_review_enqui
 const sendgridApiKey = process.env.SENDGRID_API_KEY;
 const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM || "TerraFuse <noreply@terrafuse.com.au>";
+const publicSiteUrl = process.env.PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+const emailLogoUrl = process.env.EMAIL_LOGO_URL;
 const configuredEventName = process.env.EVENT_NAME;
 
 const mimeTypes = {
@@ -185,6 +187,41 @@ function parseEmailSender(value) {
   };
 }
 
+function absoluteUrl(value) {
+  const url = cleanString(value, 500);
+
+  if (!url) {
+    return "";
+  }
+
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+function publicAssetUrl(pathname) {
+  const baseUrl = absoluteUrl(publicSiteUrl);
+
+  if (!baseUrl) {
+    return "";
+  }
+
+  return `${baseUrl.replace(/\/$/, "")}${pathname}`;
+}
+
+function customerEmailSignatureHtml() {
+  const logoUrl = absoluteUrl(emailLogoUrl) || publicAssetUrl("/images/logo_main.png");
+
+  if (!logoUrl) {
+    return "<p>TerraFuse</p>";
+  }
+
+  return `
+    <div style="margin-top:24px">
+      <p style="margin:0 0 10px">TerraFuse</p>
+      <img src="${escapeHtml(logoUrl)}" alt="TerraFuse" width="160" style="display:block;width:160px;max-width:100%;height:auto">
+    </div>
+  `;
+}
+
 function leadSummaryText(lead) {
   return [
     `Event: ${lead.event_name}`,
@@ -297,7 +334,7 @@ async function sendLeadEmails(lead) {
         <p>Thanks for your Building Suitability Review enquiry for ${escapeHtml(lead.event_name)}. The TerraFuse team has received your request and will follow up with you after the event.</p>
         <p><strong>Your request details:</strong></p>
         ${summaryHtml}
-        <p>TerraFuse</p>
+        ${customerEmailSignatureHtml()}
       `
     }),
     sendEmail({
