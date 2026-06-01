@@ -211,12 +211,11 @@ function customerEmailSignatureHtml() {
   const logoUrl = absoluteUrl(emailLogoUrl) || publicAssetUrl("/images/logo_main.png");
 
   if (!logoUrl) {
-    return "<p>TerraFuse</p>";
+    return "";
   }
 
   return `
     <div style="margin-top:24px">
-      <p style="margin:0 0 10px">TerraFuse</p>
       <img src="${escapeHtml(logoUrl)}" alt="TerraFuse" width="160" style="display:block;width:160px;max-width:100%;height:auto">
     </div>
   `;
