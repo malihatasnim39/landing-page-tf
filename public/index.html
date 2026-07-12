@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="TerraFuse QStrata 2026 landing page for EV charging and visitor parking solutions for strata buildings.">
-    <title>TerraFuse at QStrata 2026</title>
+    <meta name="description" content="TerraFuse events landing page for EV charging and visitor parking solutions for strata buildings.">
+    <title>TerraFuse Events</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260529b">
+    <link rel="stylesheet" href="./styles.css?v=20260712a">
     <script>
       (function () {
         var storedTheme = localStorage.getItem("terrafuse-theme");
@@ -53,12 +53,12 @@
       <section class="hero section">
         <div class="shell hero-grid">
           <div class="hero-copy reveal">
-            <p class="eyebrow">TerraFuse at QStrata 2026</p>
-            <h1>EV Charging and Visitor Parking<br>Solutions for Strata Buildings</h1>
-            <p class="hero-subhead">Fully managed building amenities for body corporate communities, designed to reduce admin, improve fairness, and help strata managers support future-ready buildings.</p>
+            <p class="eyebrow" data-org-eyebrow>TerraFuse Events</p>
+            <h1 data-org-heading>EV Charging and Visitor Parking<br>Solutions for Strata Buildings</h1>
+            <p class="hero-subhead" data-org-subheadline>Fully managed building amenities for body corporate communities, designed to reduce admin, improve fairness, and help strata managers support future-ready buildings.</p>
             <div class="hero-actions">
               <a class="button" href="#lead-form">Book a Free Building Suitability Review</a>
-              <a class="button button-secondary" href="#free-review">Meet TerraFuse at QStrata</a>
+              <a class="button button-secondary" href="#free-review" data-org-secondary-cta>Explore TerraFuse events</a>
             </div>
           </div>
           <div class="hero-visual reveal">
@@ -91,6 +91,14 @@
             <article class="mini-card"><span aria-hidden="true">06</span><h3>Visitor parking disputes</h3><p>Limited visitor spaces need clearer booking rules and access control.</p></article>
             <article class="mini-card"><span aria-hidden="true">07</span><h3>Admin workload</h3><p>Modern amenities should reduce manual follow-up for strata managers.</p></article>
           </div>
+        </div>
+      </section>
+
+      <section class="section organization-section" id="organization-focus">
+        <div class="shell organization-panel reveal">
+          <p class="eyebrow" data-org-section-eyebrow>Events and partnerships</p>
+          <h2 data-org-section-heading>Built for strata conversations that turn interest into action.</h2>
+          <p data-org-section-copy>TerraFuse events help strata managers, committees and building stakeholders understand practical pathways for EV charging and smarter visitor parking management.</p>
         </div>
       </section>
 
@@ -187,7 +195,7 @@
           </div>
 
           <form class="lead-form reveal" id="lead-form" novalidate>
-            <input type="hidden" name="eventName" value="QStrata 2026">
+            <input type="hidden" name="eventName" value="TerraFuse Events" data-org-default-event-name>
             <div class="form-heading">
               <h2>Building Suitability Review request</h2>
               <p>Required fields are marked with an asterisk.</p>
@@ -255,13 +263,13 @@
           <p class="footer-name">TerraFuse</p>
         </div>
         <div>
-          <p class="footer-context">QStrata 2026</p>
+          <p class="footer-context" data-org-footer-context>TerraFuse Events</p>
           <p>EV charging and visitor parking, fully managed for strata communities.</p>
         </div>
         <p class="copyright">© <span id="year"></span> TerraFuse. All rights reserved.</p>
       </div>
     </footer>
 
-    <script src="./main.js?v=20260529b" defer></script>
+    <script src="./main.js?v=20260712b" type="module"></script>
   </body>
 </html>

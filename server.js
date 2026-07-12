@@ -103,9 +103,32 @@ function cleanString(value, maxLength = 500) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
+function cleanNullableString(value, maxLength = 500) {
+  const text = cleanString(value, maxLength);
+  return text || null;
+}
+
 function cleanLeadPayload(payload) {
+  const trackingEventName = cleanString(payload.trackingEventName, 160);
+  const defaultEventName = cleanString(configuredEventName || payload.eventName || "TerraFuse Events", 160);
   const lead = {
-    event_name: cleanString(configuredEventName || payload.eventName || "QStrata 2026", 160),
+    organization_slug: cleanNullableString(payload.organization_slug, 120),
+    organization_name: cleanNullableString(payload.organization_name, 160),
+    event_slug: cleanNullableString(payload.event_slug, 160),
+    event_name: trackingEventName || defaultEventName,
+    landing_page_variant: cleanNullableString(payload.landing_page_variant, 120),
+    landing_page_path: cleanNullableString(payload.landing_page_path, 500),
+    landing_page_url: cleanNullableString(payload.landing_page_url, 1000),
+    iframe_url: cleanNullableString(payload.iframe_url, 1000),
+    parent_url: cleanNullableString(payload.parent_url, 1000),
+    parent_path: cleanNullableString(payload.parent_path, 500),
+    referrer: cleanNullableString(payload.referrer, 1000),
+    utm_source: cleanNullableString(payload.utm_source, 160),
+    utm_medium: cleanNullableString(payload.utm_medium, 160),
+    utm_campaign: cleanNullableString(payload.utm_campaign, 260),
+    utm_content: cleanNullableString(payload.utm_content, 260),
+    utm_term: cleanNullableString(payload.utm_term, 260),
+    utm_id: cleanNullableString(payload.utm_id, 160),
     full_name: cleanString(payload.fullName, 160),
     company: cleanString(payload.company, 160),
     email: cleanString(payload.email, 254).toLowerCase(),
@@ -237,6 +260,19 @@ function leadSummaryText(lead) {
   ].join("\n");
 }
 
+function leadAttributionText(lead) {
+  return [
+    `Organization: ${lead.organization_name || "Not provided"}`,
+    `Event: ${lead.event_name || "Not provided"}`,
+    `Event slug: ${lead.event_slug || "Not provided"}`,
+    `Landing page: ${lead.landing_page_path || "Not provided"}`,
+    `Campaign: ${lead.utm_campaign || "Not provided"}`,
+    `Source / Medium: ${lead.utm_source || "Not provided"} / ${lead.utm_medium || "Not provided"}`,
+    `Content: ${lead.utm_content || "Not provided"}`,
+    `Parent URL: ${lead.parent_url || "Not provided"}`
+  ].join("\n");
+}
+
 function leadSummaryHtml(lead) {
   return `
     <table cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:680px">
@@ -252,6 +288,29 @@ function leadSummaryHtml(lead) {
         ["Optional note", lead.note || "Not provided"],
         ["Contact consent", lead.contact_consent ? "Yes" : "No"],
         ["Marketing updates consent", lead.marketing_consent ? "Yes" : "No"]
+      ].map(([label, value]) => `
+        <tr>
+          <th align="left" style="border:1px solid #d9e5ee;background:#f5f9fc">${escapeHtml(label)}</th>
+          <td style="border:1px solid #d9e5ee">${escapeHtml(value)}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
+}
+
+function leadAttributionHtml(lead) {
+  return `
+    <h2 style="font-size:18px;margin:24px 0 12px">Lead attribution</h2>
+    <table cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:680px">
+      ${[
+        ["Organization", lead.organization_name || "Not provided"],
+        ["Event", lead.event_name || "Not provided"],
+        ["Event slug", lead.event_slug || "Not provided"],
+        ["Landing page", lead.landing_page_path || "Not provided"],
+        ["Campaign", lead.utm_campaign || "Not provided"],
+        ["Source / Medium", `${lead.utm_source || "Not provided"} / ${lead.utm_medium || "Not provided"}`],
+        ["Content", lead.utm_content || "Not provided"],
+        ["Parent URL", lead.parent_url || "Not provided"]
       ].map(([label, value]) => `
         <tr>
           <th align="left" style="border:1px solid #d9e5ee;background:#f5f9fc">${escapeHtml(label)}</th>
@@ -313,6 +372,8 @@ async function sendEmail({ to, subject, text, html }) {
 async function sendLeadEmails(lead) {
   const summaryText = leadSummaryText(lead);
   const summaryHtml = leadSummaryHtml(lead);
+  const attributionText = leadAttributionText(lead);
+  const attributionHtml = leadAttributionHtml(lead);
 
   await Promise.all([
     sendEmail({
@@ -342,11 +403,15 @@ async function sendLeadEmails(lead) {
       text: [
         "A new Building Suitability Review request was submitted.",
         "",
-        summaryText
+        summaryText,
+        "",
+        "Lead attribution:",
+        attributionText
       ].join("\n"),
       html: `
         <p>A new Building Suitability Review request was submitted.</p>
         ${summaryHtml}
+        ${attributionHtml}
       `
     })
   ]);
@@ -391,7 +456,17 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  if (pathname === "/" || pathname === "/qstrata" || pathname === "/qstrata/") {
+  if (
+    pathname === "/"
+    || pathname === "/qstrata"
+    || pathname === "/qstrata/"
+    || pathname === "/events"
+    || pathname === "/events/"
+    || pathname === "/sca-queensland"
+    || pathname === "/sca-queensland/"
+    || pathname === "/smart-strata"
+    || pathname === "/smart-strata/"
+  ) {
     sendFile(response, indexPath);
     return;
   }
@@ -423,5 +498,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`TerraFuse QStrata landing page listening on http://localhost:${port}`);
+  console.log(`TerraFuse events landing page listening on http://localhost:${port}`);
 });
