@@ -103,7 +103,7 @@ function postLeadSubmittedMessage(leadPayload) {
       lead_organization: leadPayload.organization_slug || null,
       lead_organization_name: leadPayload.organization_name || null,
       lead_event: leadPayload.event_slug || null,
-      lead_event_name: leadPayload.eventName || null,
+      lead_event_name: leadPayload.event_name || null,
       landing_page_variant: leadPayload.landing_page_variant || null,
       landing_page_path: leadPayload.landing_page_path || null,
       utm_source: leadPayload.utm_source || null,
