@@ -1,16 +1,62 @@
-import { getAttribution, getAttributionMeta, getOrganizationConfig } from "./attribution.js?v=20260712b";
+import { getAttribution, getAttributionMeta, getOrganizationConfig } from "./attribution.js?v=20260826a";
 
 const root = document.documentElement;
 const toggle = document.querySelector(".theme-toggle");
 const form = document.querySelector("#lead-form");
 const year = document.querySelector("#year");
+const heroSection = document.querySelector(".hero");
+const reviewSection = document.querySelector("#free-review");
 
 const SUBMISSION_ENDPOINT = "/api/leads";
-const GA_PARENT_ORIGIN = "https://terrafuse.com.au";
+const DEFAULT_PARENT_ORIGIN = "https://terrafuse.com.au";
+const ALLOWED_PARENT_ORIGINS = new Set([
+  "https://terrafuse.com.au",
+  "https://www.terrafuse.com.au"
+]);
 
 const attribution = getAttribution();
 const attributionMeta = getAttributionMeta();
 const organizationConfig = getOrganizationConfig(attribution);
+
+function getParentOrigin() {
+  for (const value of [attribution.parent_url, document.referrer]) {
+    try {
+      const origin = new URL(value).origin;
+      if (ALLOWED_PARENT_ORIGINS.has(origin)) {
+        return origin;
+      }
+    } catch (error) {
+      // Ignore absent or malformed parent URLs and use the known site origin.
+    }
+  }
+
+  return DEFAULT_PARENT_ORIGIN;
+}
+
+function analyticsPayload() {
+  return {
+    lead_organization: attribution.organization_slug || organizationConfig.organization_slug || null,
+    lead_organization_name: attribution.organization_name || organizationConfig.organization_name || null,
+    lead_event: attribution.event_slug || null,
+    lead_event_name: attribution.event_name || organizationConfig.defaultEventName || null,
+    landing_page_variant: attribution.landing_page_variant || organizationConfig.landing_page_variant || null,
+    landing_page_path: attribution.landing_page_path || window.location.pathname,
+    iframe_path: window.location.pathname,
+    utm_source: attribution.utm_source || null,
+    utm_medium: attribution.utm_medium || null,
+    utm_campaign: attribution.utm_campaign || null,
+    utm_content: attribution.utm_content || null,
+    utm_id: attribution.utm_id || null
+  };
+}
+
+function postAnalyticsMessage(type, payload = analyticsPayload()) {
+  if (window.parent === window) {
+    return;
+  }
+
+  window.parent.postMessage({ type, payload }, getParentOrigin());
+}
 
 function applyTheme(theme) {
   root.dataset.theme = theme;
@@ -61,6 +107,14 @@ function applyOrganizationContent(config) {
   }
 }
 
+function applyPageLayout(config) {
+  root.dataset.pageLayout = config.layout;
+
+  if (config.layout === "review-first" && heroSection && reviewSection) {
+    heroSection.before(reviewSection);
+  }
+}
+
 function collectFormData(formElement) {
   const data = Object.fromEntries(new FormData(formElement).entries());
   const trackingEventName = attributionMeta.eventNameSource === "tf_event_name"
@@ -97,26 +151,29 @@ async function submitLead(data) {
 function postLeadSubmittedMessage(leadPayload) {
   // The WordPress parent listens for this non-PII event and forwards it to GA4.
   // Never include form identity fields such as name, email, mobile, company or notes.
-  window.parent?.postMessage({
-    type: "TF_LEAD_SUBMITTED",
-    payload: {
-      lead_organization: leadPayload.organization_slug || null,
-      lead_organization_name: leadPayload.organization_name || null,
-      lead_event: leadPayload.event_slug || null,
-      lead_event_name: leadPayload.event_name || null,
-      landing_page_variant: leadPayload.landing_page_variant || null,
-      landing_page_path: leadPayload.landing_page_path || null,
-      utm_source: leadPayload.utm_source || null,
-      utm_medium: leadPayload.utm_medium || null,
-      utm_campaign: leadPayload.utm_campaign || null,
-      utm_content: leadPayload.utm_content || null
-    }
-  }, GA_PARENT_ORIGIN);
+  postAnalyticsMessage("TF_LEAD_SUBMITTED", {
+    ...analyticsPayload(),
+    lead_organization: leadPayload.organization_slug || null,
+    lead_organization_name: leadPayload.organization_name || null,
+    lead_event: leadPayload.event_slug || null,
+    lead_event_name: leadPayload.eventName || leadPayload.event_name || null,
+    landing_page_variant: leadPayload.landing_page_variant || null,
+    landing_page_path: leadPayload.landing_page_path || null,
+    utm_source: leadPayload.utm_source || null,
+    utm_medium: leadPayload.utm_medium || null,
+    utm_campaign: leadPayload.utm_campaign || null,
+    utm_content: leadPayload.utm_content || null,
+    utm_id: leadPayload.utm_id || null
+  });
 }
 
 toggle?.addEventListener("click", () => {
   applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
 });
+
+form?.addEventListener("focusin", () => {
+  postAnalyticsMessage("TF_FORM_STARTED");
+}, { once: true });
 
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -169,4 +226,6 @@ if (year) {
 }
 
 applyOrganizationContent(organizationConfig);
+applyPageLayout(organizationConfig);
 applyTheme(root.dataset.theme || "light");
+postAnalyticsMessage("TF_LANDING_PAGE_VIEW");

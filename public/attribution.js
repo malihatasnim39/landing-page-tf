@@ -64,6 +64,41 @@ export const ORGANIZATION_CONFIGS = {
   }
 };
 
+const ROUTE_CONFIGS = {
+  "/qstrata": {
+    organization_slug: "general",
+    landing_page_variant: "events",
+    layout: "standard"
+  },
+  "/events": {
+    organization_slug: "general",
+    landing_page_variant: "events",
+    layout: "standard"
+  },
+  "/sca-queensland": {
+    organization_slug: "sca_queensland",
+    landing_page_variant: "sca-queensland",
+    layout: "standard"
+  },
+  "/smart-strata": {
+    organization_slug: "smart_strata",
+    landing_page_variant: "smart-strata",
+    layout: "standard"
+  },
+  "/building-solutions": {
+    organization_slug: "general",
+    landing_page_variant: "broad_standard",
+    layout: "standard",
+    defaultEventName: "TerraFuse Building Solutions"
+  },
+  "/building-solutions-review-first": {
+    organization_slug: "general",
+    landing_page_variant: "broad_form_first",
+    layout: "review-first",
+    defaultEventName: "TerraFuse Building Solutions"
+  }
+};
+
 /**
  * @typedef {Object} Attribution
  * @property {string | null} organization_slug
@@ -97,6 +132,19 @@ function normalizeOrganizationSlug(value) {
   }
 
   return slug.toLowerCase().replace(/-/g, "_");
+}
+
+function normalizePathname(value) {
+  const pathname = cleanValue(value) || "/";
+  if (pathname === "/") {
+    return pathname;
+  }
+
+  return pathname.replace(/\/+$/, "");
+}
+
+function getRouteConfig() {
+  return ROUTE_CONFIGS[normalizePathname(window.location.pathname)] || null;
 }
 
 function getStoredAttribution() {
@@ -161,8 +209,16 @@ function mergeNonEmpty(previous, next) {
 }
 
 export function getOrganizationConfig(attribution) {
-  const slug = normalizeOrganizationSlug(attribution.organization_slug);
-  return ORGANIZATION_CONFIGS[slug] || ORGANIZATION_CONFIGS.general;
+  const routeConfig = getRouteConfig();
+  const slug = routeConfig?.organization_slug || normalizeOrganizationSlug(attribution.organization_slug);
+  const organizationConfig = ORGANIZATION_CONFIGS[slug] || ORGANIZATION_CONFIGS.general;
+
+  return {
+    ...organizationConfig,
+    landing_page_variant: routeConfig?.landing_page_variant || organizationConfig.landing_page_variant,
+    layout: routeConfig?.layout || "standard",
+    defaultEventName: routeConfig?.defaultEventName || organizationConfig.defaultEventName
+  };
 }
 
 export function getAttributionMeta() {
@@ -180,6 +236,7 @@ export function getAttribution() {
   const searchParams = new URLSearchParams(window.location.search);
   const current = buildAttributionFromQuery(searchParams);
   const stored = getStoredAttribution();
+  const routeConfig = getRouteConfig();
   const eventNameSource = cleanValue(searchParams.get("tf_event_name"))
     ? "tf_event_name"
     : (stored.__event_name_source || null);
@@ -188,12 +245,18 @@ export function getAttribution() {
   // the previous stored attribution, but never erase a stored value with empty
   // query parameters from later visits.
   const merged = mergeNonEmpty(stored, current);
-  const activeOrganizationSlug = current.organization_slug || ORGANIZATION_CONFIGS.general.organization_slug;
+  const activeOrganizationSlug = routeConfig?.organization_slug
+    || current.organization_slug
+    || ORGANIZATION_CONFIGS.general.organization_slug;
   const activeOrganizationConfig = ORGANIZATION_CONFIGS[activeOrganizationSlug] || ORGANIZATION_CONFIGS.general;
 
   merged.organization_slug = activeOrganizationConfig.organization_slug;
   merged.organization_name = current.organization_name || activeOrganizationConfig.organization_name;
-  merged.landing_page_variant = current.landing_page_variant || activeOrganizationConfig.landing_page_variant;
+  // A known route is authoritative for experiment assignment. This prevents
+  // a stale query string or stored visit from changing the A/B variant.
+  merged.landing_page_variant = routeConfig?.landing_page_variant
+    || current.landing_page_variant
+    || activeOrganizationConfig.landing_page_variant;
 
   if (eventNameSource) {
     merged.__event_name_source = eventNameSource;

@@ -466,6 +466,10 @@ const server = http.createServer((request, response) => {
     || pathname === "/sca-queensland/"
     || pathname === "/smart-strata"
     || pathname === "/smart-strata/"
+    || pathname === "/building-solutions"
+    || pathname === "/building-solutions/"
+    || pathname === "/building-solutions-review-first"
+    || pathname === "/building-solutions-review-first/"
   ) {
     sendFile(response, indexPath);
     return;
