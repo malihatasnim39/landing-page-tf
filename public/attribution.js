@@ -64,6 +64,204 @@ export const ORGANIZATION_CONFIGS = {
   }
 };
 
+export const BROAD_PAGE_CONTENT = {
+  title: "EV Charging & Visitor Parking for Brisbane Buildings | TerraFuse",
+  description: "Fully managed EV charging and smart visitor parking for Brisbane apartments, body corporate communities and mixed-use buildings. Book a free building suitability review.",
+  navigation: [
+    { key: "audiences", label: "Who It’s For", href: "#audiences" },
+    { key: "ev", label: "EV Charging", href: "#ev-charging" },
+    { key: "parking", label: "Visitor Parking", href: "#visitor-parking" },
+    { key: "review", label: "Free Review", href: "#free-review" }
+  ],
+  hero: {
+    eyebrow: "TerraFuse x The Brisbane Channel",
+    heading: "EV charging and visitor parking, made simple for your building.",
+    subheadline: "TerraFuse helps residents, strata managers and building owners introduce fully managed EV charging and smarter visitor parking—with practical planning, fair access and ongoing support.",
+    primaryCta: "Book a Free Building Review",
+    secondaryCta: "See What’s in It for You",
+    secondaryCtaHref: "#audiences",
+    mediaLabel: "TerraFuse EV charging and visitor parking in action",
+    statHeading: "One managed platform",
+    statCopy: "EV charging, visitor parking, billing, access and ongoing support."
+  },
+  audiences: {
+    eyebrow: "Built for the whole building",
+    heading: "TerraFuse has something to offer everyone.",
+    introduction: "Select your role to see how better EV charging and visitor parking can benefit you and your Brisbane building.",
+    cta: "Book a Free Building Review",
+    panels: [
+      {
+        id: "residents",
+        label: "Residents",
+        heading: "More convenience where you live.",
+        image: "../images/pxl_20250321_011958143.mp.jpg",
+        imageAlt: "Electric vehicle charging in a shared apartment car park",
+        imagePosition: "center center",
+        benefits: [
+          {
+            heading: "Charge where you live",
+            copy: "Access convenient shared EV charging in your building without relying only on public charging."
+          },
+          {
+            heading: "Fair, simple access",
+            copy: "App-based access and user-pays charging help keep usage and costs clear, without making non-users pay for electricity they do not use."
+          },
+          {
+            heading: "Easier visits",
+            copy: "Clear visitor parking bookings and controlled access make it easier to host guests with less uncertainty and frustration."
+          }
+        ]
+      },
+      {
+        id: "strata-managers",
+        label: "Strata Managers",
+        heading: "Modern amenities without more administration.",
+        image: "../images/WhatsApp Image 2026-07-04 at 13.34.36.jpeg",
+        imageAlt: "TerraFuse EV charging and managed visitor bays in a shared building car park",
+        imagePosition: "center center",
+        benefits: [
+          {
+            heading: "Less day-to-day workload",
+            copy: "TerraFuse manages onboarding, billing, monitoring, support and maintenance, so your team is not left operating another system."
+          },
+          {
+            heading: "Fewer shared-space disputes",
+            copy: "Clear charging and visitor parking rules, bookings and access controls help reduce avoidable resident complaints."
+          },
+          {
+            heading: "A practical approval pathway",
+            copy: "Start with building suitability, resident demand and a clear implementation pathway that can be presented to the body corporate committee."
+          }
+        ]
+      },
+      {
+        id: "building-owners",
+        label: "Building Owners",
+        heading: "Make the building more appealing and ready for change.",
+        image: "../images/PXL_20251129_035834023.MP.jpg",
+        imageAlt: "Scalable TerraFuse EV charging infrastructure in a multi-residential car park",
+        imagePosition: "center center",
+        benefits: [
+          {
+            heading: "Stronger building appeal",
+            copy: "Offer useful, future-focused amenities that respond to changing resident and tenant expectations."
+          },
+          {
+            heading: "A lower barrier to action",
+            copy: "Eligible buildings can explore a no-upfront-installation-cost pathway instead of funding a major infrastructure project alone."
+          },
+          {
+            heading: "Infrastructure that can grow",
+            copy: "Plan shared charging and parking infrastructure that can expand with demand instead of relying on disconnected one-off solutions."
+          }
+        ]
+      }
+    ]
+  },
+  evCharging: {
+    eyebrow: "EV Charging",
+    heading: "Shared EV charging built around how your building works.",
+    introduction: "Every building is different. TerraFuse reviews demand, car park layout, electrical capacity and access needs, then helps plan a communal charging model that can be introduced and managed over time.",
+    image: "../images/IMG_3182~photo-full.jpg",
+    imageAlt: "Electric vehicle using a completed TerraFuse shared charging installation",
+    services: [
+      "Initial building suitability review",
+      "Site and infrastructure assessment",
+      "Shared charging and load-management planning",
+      "Installation and commissioning",
+      "Resident and user onboarding",
+      "App-based access and billing",
+      "Monitoring, support and maintenance"
+    ],
+    features: [
+      {
+        heading: "Lower upfront barrier",
+        copy: "Eligible buildings can access a no-upfront-installation-cost pathway."
+      },
+      {
+        heading: "Fair user-pays model",
+        copy: "EV users pay for the charging service they use, helping keep the model fair for other residents."
+      },
+      {
+        heading: "Managed end to end",
+        copy: "TerraFuse coordinates the technology, access, billing, monitoring and ongoing support."
+      },
+      {
+        heading: "Ready to scale",
+        copy: "Start with what the building needs now and plan for future charging demand."
+      }
+    ]
+  },
+  visitorParking: {
+    eyebrow: "Visitor Parking",
+    heading: "Take the guesswork out of visitor parking.",
+    introduction: "TerraFuse combines app-based booking, hardwired smart bollards, configurable access rules and operational support to help Brisbane buildings manage limited visitor bays more consistently.",
+    image: "../images/WhatsApp Image 2026-07-04 at 13.34.41.jpeg",
+    imageAlt: "Visitor parking bays protected by TerraFuse smart bollards",
+    features: [
+      {
+        heading: "Clearer bookings",
+        copy: "Residents have a straightforward way to organise visitor parking."
+      },
+      {
+        heading: "Better access control",
+        copy: "Smart bollards and configurable rules help discourage unauthorised use and overstays."
+      },
+      {
+        heading: "Less manual follow-up",
+        copy: "A managed system reduces the need for building teams to handle every parking issue manually."
+      },
+      {
+        heading: "A better resident experience",
+        copy: "Residents can host visitors with greater confidence and fewer parking frustrations."
+      }
+    ]
+  },
+  whyTerraFuse: {
+    eyebrow: "Why TerraFuse",
+    heading: "One partner from the first review to ongoing operation.",
+    copy: "TerraFuse brings the planning, technology and day-to-day operation together. The result is a practical pathway for Brisbane residents, body corporate communities, building managers and owners—not another disconnected system for the building to manage.",
+    benefits: [
+      "Building-first planning",
+      "Fully managed operation",
+      "Fair shared-use model",
+      "App-based access and billing",
+      "Ongoing monitoring and support",
+      "Scalable infrastructure planning"
+    ]
+  },
+  review: {
+    eyebrow: "Free Building Review",
+    heading: "Is your building ready for EV charging or smarter visitor parking?",
+    lead: "Tell us a little about your Brisbane apartment, mixed-use property or building portfolio. TerraFuse will help identify a practical next step—whether you are a resident raising the idea, a strata manager supporting a committee, or an owner planning ahead.",
+    coverageHeading: "The review can cover",
+    coverage: [
+      "Current resident or tenant interest",
+      "Existing car park layout",
+      "Visitor parking access needs",
+      "Initial power and infrastructure suitability",
+      "Basement connectivity and smart bollard options",
+      "Potential rollout pathways",
+      "Body corporate or committee discussion support"
+    ]
+  },
+  form: {
+    heading: "Request your free building review",
+    introduction: "Tell us about your building. Required fields are marked with an asterisk.",
+    buildingLabel: "Building or organisation *",
+    buildingHelper: "Residents can enter their building name or suburb.",
+    buildingCountLabel: "Number of buildings, if applicable",
+    noteLabel: "Tell us about your building or enquiry",
+    marketingConsent: "I would also like to receive future TerraFuse updates and related information. I can unsubscribe at any time.",
+    submitLabel: "Book My Free Building Review",
+    successMessage: "Thank you—your Building Suitability Review request has been received. The TerraFuse team will contact you shortly."
+  },
+  footer: {
+    context: "TerraFuse Brisbane Building Solutions",
+    copy: "Fully managed EV charging and smart visitor parking for Brisbane apartment, body corporate and mixed-use buildings."
+  }
+};
+
 const ROUTE_CONFIGS = {
   "/qstrata": {
     organization_slug: "general",
@@ -89,12 +287,14 @@ const ROUTE_CONFIGS = {
     organization_slug: "general",
     landing_page_variant: "broad_standard",
     layout: "standard",
+    contentMode: "broad",
     defaultEventName: "TerraFuse Building Solutions"
   },
   "/building-solutions-review-first": {
     organization_slug: "general",
     landing_page_variant: "broad_form_first",
     layout: "review-first",
+    contentMode: "broad",
     defaultEventName: "TerraFuse Building Solutions"
   }
 };
@@ -217,6 +417,7 @@ export function getOrganizationConfig(attribution) {
     ...organizationConfig,
     landing_page_variant: routeConfig?.landing_page_variant || organizationConfig.landing_page_variant,
     layout: routeConfig?.layout || "standard",
+    contentMode: routeConfig?.contentMode || "organization",
     defaultEventName: routeConfig?.defaultEventName || organizationConfig.defaultEventName
   };
 }

@@ -6,16 +6,16 @@ This handoff creates three public YouTube links, assigns each visitor to a stick
 
 | Purpose | Public WordPress URL | Internal Vercel iframe URL |
 | --- | --- | --- |
-| Video 1 entry | `https://terrafuse.com.au/go/video-1` | Assigned automatically |
-| Video 2 entry | `https://terrafuse.com.au/go/video-2` | Assigned automatically |
-| Video 3 entry | `https://terrafuse.com.au/go/video-3` | Assigned automatically |
+| Building Review video | `https://terrafuse.com.au/building-review` | Assigned automatically |
+| Free Building Review video | `https://terrafuse.com.au/free-building-review` | Assigned automatically |
+| Future-Ready Buildings video | `https://terrafuse.com.au/future-ready-buildings` | Assigned automatically |
 | Standard layout | `https://terrafuse.com.au/building-solutions` | `https://landing-page-tf.vercel.app/building-solutions` |
 | Review-first layout | `https://terrafuse.com.au/building-solutions-review-first` | `https://landing-page-tf.vercel.app/building-solutions-review-first` |
 | Events | `https://terrafuse.com.au/events` | `https://landing-page-tf.vercel.app/events` |
 | Smart Strata | `https://terrafuse.com.au/smart-strata` | `https://landing-page-tf.vercel.app/smart-strata` |
 | SCA Queensland | `https://terrafuse.com.au/sca-queensland` | `https://landing-page-tf.vercel.app/sca-queensland` |
 
-The three `/go/video-N` URLs are the only links and QR codes supplied to the YouTube partner. The A/B destination is selected automatically.
+These three branded URLs are the only links and QR codes supplied to the YouTube partner. The A/B destination is selected automatically.
 
 ## 1. Add the three WordPress tracking routes
 
@@ -24,27 +24,20 @@ Add this PHP through the **Code Snippets** plugin or paste it inside the existin
 ```php
 /**
  * TerraFuse YouTube landing-page experiment.
- * Public routes: /go/video-1, /go/video-2, /go/video-3
+ * Detects the three public paths directly, so it does not depend on
+ * custom WordPress rewrite rules.
  */
-add_action('init', function () {
-    add_rewrite_rule(
-        '^go/(video-[123])/?$',
-        'index.php?tf_youtube_video=$matches[1]',
-        'top'
-    );
-});
-
-add_filter('query_vars', function ($query_vars) {
-    $query_vars[] = 'tf_youtube_video';
-    return $query_vars;
-});
-
 add_action('template_redirect', function () {
-    $route = sanitize_key((string) get_query_var('tf_youtube_video'));
+    $request_path = wp_parse_url(
+        wp_unslash($_SERVER['REQUEST_URI'] ?? '/'),
+        PHP_URL_PATH
+    );
+    $route = trim((string) $request_path, '/');
+
     $video_sources = array(
-        'video-1' => 'video_1',
-        'video-2' => 'video_2',
-        'video-3' => 'video_3',
+        'building-review'       => 'building_review_video',
+        'free-building-review'  => 'free_building_review_video',
+        'future-ready-buildings' => 'future_ready_buildings_video',
     );
 
     if (!isset($video_sources[$route])) {
@@ -88,9 +81,11 @@ add_action('template_redirect', function () {
 }, 1);
 ```
 
-After enabling the snippet, open **WordPress Admin → Settings → Permalinks** and click **Save Changes** once. This flushes WordPress rewrite rules so the three `/go/` URLs work.
+In **Code Snippets**, set the snippet to run on the site frontend (normally **Run everywhere**) and confirm its status is **Active**. Do not choose an admin-only scope. This version reads the public paths directly, so saving WordPress permalinks is not required.
 
-Do not cache the `/go/video-1`, `/go/video-2`, or `/go/video-3` responses at the CDN/page-cache layer. A cached redirect could force every visitor to the same variant or video attribution.
+After activating it, purge the Hostinger/LiteSpeed page cache and test all three paths in a private window. Each path must return a `302` response whose `Location` is one of the two public WordPress destination pages with the expected UTM parameters.
+
+Do not cache `/building-review`, `/free-building-review`, or `/future-ready-buildings` at the CDN/page-cache layer. A cached redirect could force every visitor to the same variant or video attribution.
 
 ## 2. Create or update the five WordPress iframe pages
 
@@ -104,15 +99,15 @@ Use the iframe base URL matching each WordPress page:
 | `/smart-strata` | `https://landing-page-tf.vercel.app/smart-strata` |
 | `/sca-queensland` | `https://landing-page-tf.vercel.app/sca-queensland` |
 
-Paste the following into the page's Custom HTML block or HTML widget. Change only `data-iframe-base` and the title for that page. Retain any existing site-specific iframe height styling if it is managed elsewhere.
+Paste the following into the page's Custom HTML block or HTML widget. Change `src`, `data-iframe-base`, and the title for that page; `src` and `data-iframe-base` must contain the same Vercel route. The existing `landing-page-iframe` class is retained so the iframe continues using the working WordPress CSS for its dimensions and presentation.
 
 ```html
 <iframe
   id="tf-landing-page"
+  class="landing-page-iframe"
   data-iframe-base="https://landing-page-tf.vercel.app/building-solutions"
   title="TerraFuse Building Solutions"
-  src="about:blank"
-  style="display:block;width:100%;border:0"
+  src="https://landing-page-tf.vercel.app/building-solutions"
   loading="eager"
 ></iframe>
 
@@ -191,23 +186,103 @@ Paste the following into the page's Custom HTML block or HTML widget. Change onl
 </script>
 ```
 
+Set `src` and `data-iframe-base` to the same Vercel route on each WordPress page. The real `src` is a reliable fallback: the landing page still displays if WordPress delays or strips the inline script. When the script runs, it replaces `src` with the same Vercel route plus the forwarded tracking parameters.
+
+If the landing page displays but its final iframe URL does not contain the WordPress page's UTM parameters, WordPress is not executing the inline script. In that case, move the JavaScript into the **Code Snippets** plugin or the active child theme rather than relying on the page's Custom HTML block. The iframe can display without that script, but video attribution and iframe-to-GA4 events require it.
+
 If the existing WordPress pages already contain a `TF_LEAD_SUBMITTED` message listener, replace it with the combined listener above. Keeping both will double-count lead events.
+
+### Verify iframe forwarding and event delivery
+
+1. Open this test URL after the WordPress page is published:
+
+   ```text
+   https://terrafuse.com.au/building-solutions?utm_source=test&utm_medium=manual&utm_campaign=iframe_check&utm_content=building_review_video&utm_id=building_solutions_layout_2026
+   ```
+
+2. Open browser developer tools and select **Console**. In Chrome or Edge on macOS, use `Option + Command + J`.
+3. Paste and run:
+
+   ```javascript
+   (function () {
+     var iframe = document.getElementById('tf-landing-page');
+     if (!iframe) return { error: 'Iframe not found' };
+     var url = new URL(iframe.src);
+     return {
+       finalIframeUrl: url.href,
+       utmSource: url.searchParams.get('utm_source'),
+       utmContent: url.searchParams.get('utm_content'),
+       variantPath: url.pathname,
+       parentPath: url.searchParams.get('parent_path')
+     };
+   })();
+   ```
+
+4. The result must show:
+
+   ```text
+   utmSource: "test"
+   utmContent: "building_review_video"
+   variantPath: "/building-solutions"
+   parentPath: "/building-solutions"
+   ```
+
+If the iframe is found but the UTM values are `null`, the inline forwarding script did not run. If the iframe is not found, verify that the HTML uses `id="tf-landing-page"`.
+
+To verify event delivery and detect duplicate listeners:
+
+1. Open developer tools **Network**, filter requests by `collect`, and reload the page.
+2. Confirm one GA request is sent for `tf_landing_page_view`.
+3. Focus a form field once and confirm one request is sent for `tf_form_start`.
+4. If either action produces two identical requests, remove the older WordPress message listener and retain only the combined listener in this handoff.
+5. Confirm the same events appear in GA4 Realtime or DebugView during the Site Kit review.
+
+Do not submit the form merely to test `generate_lead`, because a successful submission creates a Supabase record and sends the configured emails. Test that event later with a clearly identified test lead during the approved end-to-end release check.
 
 ## 3. Site Kit and GA4 review
 
 Site Kit continues to own the Google tag. The snippet above queues custom events into that tag and does not install another Analytics ID.
 
-1. In **Site Kit → Settings → Connected Services → Analytics**, record the GA4 measurement ID and confirm Site Kit is placing the code.
-2. Visit each final WordPress page with GA4 DebugView open.
-3. Confirm `tf_landing_page_view`, `tf_form_start`, and `generate_lead` arrive once per intended action.
-4. In GA4, register event-scoped custom dimensions for `landing_page_variant`, `utm_content`, and `utm_id` if they are not already available in reporting.
-5. Mark `generate_lead` as a key event.
+### Prepare the test session
+
+1. In **WordPress Admin → Site Kit → Settings → Connected Services → Analytics**, record the GA4 measurement ID and confirm **Place Google Analytics code** is enabled.
+2. Site Kit excludes logged-in WordPress users from Analytics by default. Log out of WordPress in the browser tab used for testing, or temporarily disable **Exclude Analytics → All logged-in users** in Site Kit.
+3. Disable ad blockers for `terrafuse.com.au` and grant Analytics consent if the site displays a cookie-consent banner.
+
+### Start Tag Assistant and DebugView
+
+1. In Google Chrome, open [Google Tag Assistant](https://tagassistant.google.com/).
+2. Select **Add domain**, enter the final WordPress page URL below, and select **Connect**:
+
+   ```text
+   https://terrafuse.com.au/building-solutions?utm_source=test&utm_medium=manual&utm_campaign=iframe_check&utm_content=building_review_video&utm_id=building_solutions_layout_2026
+   ```
+
+3. Tag Assistant opens the WordPress page in a separate debug tab and adds a debug parameter to its URL. Keep both the Tag Assistant tab and the opened website tab running.
+4. In another tab, open [Google Analytics](https://analytics.google.com/), select the same property and measurement ID used by Site Kit, then go to **Admin → Data display → DebugView**.
+5. If DebugView offers a device selector, select the active browser device created by Tag Assistant.
+
+### Trigger and confirm the events
+
+1. Reload the Tag Assistant-opened WordPress page. Within several seconds, confirm `tf_landing_page_view` appears once in DebugView.
+2. Click into any field inside the iframe form. Confirm `tf_form_start` appears once.
+3. Repeat the process with:
+
+   ```text
+   https://terrafuse.com.au/building-solutions-review-first?utm_source=test&utm_medium=manual&utm_campaign=iframe_check&utm_content=building_review_video&utm_id=building_solutions_layout_2026
+   ```
+
+4. Select an event in DebugView and confirm its parameters include the expected `landing_page_variant`, `utm_content`, and `utm_id` values.
+5. Do not test `generate_lead` until an approved end-to-end test, because a successful form submission creates a Supabase record and sends the configured emails.
+6. In GA4, register event-scoped custom dimensions for `landing_page_variant`, `utm_content`, and `utm_id` if they are not already available in reporting, and mark `generate_lead` as a key event.
+
+Start Tag Assistant directly on the two final WordPress landing pages, not on one of the three public video redirect links. Multiple redirects can interfere with the debug connection, while the source-routing behavior is tested separately in the release checks.
 
 No form identity fields are included in the iframe messages. Name, email, mobile, company, and notes remain only in the existing lead-submission workflow.
 
 ## 4. Release checks
 
-- Test all three `/go/video-N` links in private windows and confirm `utm_content` matches the link.
+- Test all three branded tracking links in private windows and confirm `utm_content` is respectively `building_review_video`, `free_building_review_video`, or `future_ready_buildings_video`.
 - Clear the `tf_building_solutions_variant` cookie between assignment tests.
 - Confirm the same browser remains on the same layout for repeat visits during the 30-day window.
 - Confirm Variant A keeps the review form at the bottom and Variant B places it directly after the header.

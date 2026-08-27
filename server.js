@@ -244,17 +244,22 @@ function customerEmailSignatureHtml() {
   `;
 }
 
+function isBroadBuildingSolutionsLead(lead) {
+  return ["broad_standard", "broad_form_first"].includes(lead.landing_page_variant);
+}
+
 function leadSummaryText(lead) {
+  const isBroadLead = isBroadBuildingSolutionsLead(lead);
   return [
     `Event: ${lead.event_name}`,
     `Full name: ${lead.full_name}`,
-    `Company: ${lead.company}`,
+    `${isBroadLead ? "Building or organisation" : "Company"}: ${lead.company}`,
     `Email: ${lead.email}`,
     `Mobile: ${lead.mobile}`,
-    `Number of buildings under management: ${lead.building_count ?? "Not provided"}`,
+    `${isBroadLead ? "Number of buildings" : "Number of buildings under management"}: ${lead.building_count ?? "Not provided"}`,
     `Main interest: ${lead.main_interest}`,
     `Preferred follow-up time: ${lead.preferred_follow_up_time || "Not provided"}`,
-    `Optional note: ${lead.note || "Not provided"}`,
+    `${isBroadLead ? "Building or enquiry details" : "Optional note"}: ${lead.note || "Not provided"}`,
     `Contact consent: ${lead.contact_consent ? "Yes" : "No"}`,
     `Marketing updates consent: ${lead.marketing_consent ? "Yes" : "No"}`
   ].join("\n");
@@ -274,18 +279,19 @@ function leadAttributionText(lead) {
 }
 
 function leadSummaryHtml(lead) {
+  const isBroadLead = isBroadBuildingSolutionsLead(lead);
   return `
     <table cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:680px">
       ${[
         ["Event", lead.event_name],
         ["Full name", lead.full_name],
-        ["Company", lead.company],
+        [isBroadLead ? "Building or organisation" : "Company", lead.company],
         ["Email", lead.email],
         ["Mobile", lead.mobile],
-        ["Number of buildings under management", lead.building_count ?? "Not provided"],
+        [isBroadLead ? "Number of buildings" : "Number of buildings under management", lead.building_count ?? "Not provided"],
         ["Main interest", lead.main_interest],
         ["Preferred follow-up time", lead.preferred_follow_up_time || "Not provided"],
-        ["Optional note", lead.note || "Not provided"],
+        [isBroadLead ? "Building or enquiry details" : "Optional note", lead.note || "Not provided"],
         ["Contact consent", lead.contact_consent ? "Yes" : "No"],
         ["Marketing updates consent", lead.marketing_consent ? "Yes" : "No"]
       ].map(([label, value]) => `
@@ -370,10 +376,14 @@ async function sendEmail({ to, subject, text, html }) {
 }
 
 async function sendLeadEmails(lead) {
+  const isBroadLead = isBroadBuildingSolutionsLead(lead);
   const summaryText = leadSummaryText(lead);
   const summaryHtml = leadSummaryHtml(lead);
   const attributionText = leadAttributionText(lead);
   const attributionHtml = leadAttributionHtml(lead);
+  const customerAcknowledgement = isBroadLead
+    ? "The TerraFuse team has received your Building Suitability Review request and will contact you shortly."
+    : `Thanks for your Building Suitability Review enquiry for ${lead.event_name}. The TerraFuse team has received your request and will follow up with you after the event.`;
 
   await Promise.all([
     sendEmail({
@@ -382,7 +392,7 @@ async function sendLeadEmails(lead) {
       text: [
         `Hi ${lead.full_name},`,
         "",
-        `Thanks for your Building Suitability Review enquiry for ${lead.event_name}. The TerraFuse team has received your request and will follow up with you after the event.`,
+        customerAcknowledgement,
         "",
         "Your request details:",
         summaryText,
@@ -391,7 +401,7 @@ async function sendLeadEmails(lead) {
       ].join("\n"),
       html: `
         <p>Hi ${escapeHtml(lead.full_name)},</p>
-        <p>Thanks for your Building Suitability Review enquiry for ${escapeHtml(lead.event_name)}. The TerraFuse team has received your request and will follow up with you after the event.</p>
+        <p>${escapeHtml(customerAcknowledgement)}</p>
         <p><strong>Your request details:</strong></p>
         ${summaryHtml}
         ${customerEmailSignatureHtml()}

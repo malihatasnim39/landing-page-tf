@@ -268,6 +268,7 @@ textarea {
 h1,
 h2,
 h3,
+h4,
 p {
   margin-top: 0;
 }
@@ -428,6 +429,154 @@ h3 {
   color: var(--text-muted);
   font-size: 0.92rem;
   line-height: 1.55;
+}
+
+.audience-section {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--green) 8%, transparent), transparent 54%),
+    var(--bg-soft);
+}
+
+.audience-explorer {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 6px);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.audience-tablist {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px;
+  background: color-mix(in srgb, var(--bg-muted) 68%, var(--card));
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.audience-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+.audience-tab {
+  min-height: 48px;
+  padding: 11px 24px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text-muted);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.audience-tab:hover {
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.audience-tab[aria-selected="true"] {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--primary), #0077bd 56%, var(--green));
+  color: #fff;
+}
+
+.audience-tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--green) 58%, transparent);
+  outline-offset: 3px;
+}
+
+.audience-panel {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+  min-height: 580px;
+}
+
+.audience-panel[hidden] {
+  display: none;
+}
+
+.audience-media {
+  position: relative;
+  min-height: 580px;
+  overflow: hidden;
+  background: var(--bg-muted);
+}
+
+.audience-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 62%, rgba(6, 24, 38, 0.22));
+  pointer-events: none;
+}
+
+.audience-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 580px;
+  object-fit: cover;
+}
+
+.audience-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px;
+}
+
+.audience-content > h3 {
+  margin-bottom: 28px;
+  font-size: clamp(1.55rem, 2.6vw, 2.3rem);
+}
+
+.audience-benefits {
+  display: grid;
+  gap: 16px;
+}
+
+.audience-benefit {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-soft) 88%, var(--bg-muted));
+}
+
+.audience-benefit-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+  color: var(--green-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.audience-benefit h4 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.audience-benefit p {
+  margin-bottom: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.audience-cta {
+  align-self: flex-start;
+  margin-top: 26px;
 }
 
 .split-section {
@@ -623,6 +772,14 @@ label {
   font-weight: 700;
 }
 
+.field-helper {
+  margin-top: -2px;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 input,
 select,
 textarea {
@@ -796,8 +953,18 @@ textarea:focus {
   .split-grid,
   .split-grid.reverse,
   .why-grid,
-  .review-grid {
+  .review-grid,
+  .audience-panel {
     grid-template-columns: 1fr;
+  }
+
+  .audience-panel {
+    min-height: 0;
+  }
+
+  .audience-media,
+  .audience-media img {
+    min-height: 380px;
   }
 
   .split-grid.reverse .content-column {
@@ -921,6 +1088,47 @@ textarea:focus {
   .benefit-list,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .audience-tablist {
+    justify-content: flex-start;
+    padding: 16px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+  }
+
+  .audience-tab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 10px 18px;
+  }
+
+  .audience-media,
+  .audience-media img {
+    min-height: 300px;
+  }
+
+  .audience-content {
+    padding: 28px 22px 32px;
+  }
+
+  .audience-content > h3 {
+    margin-bottom: 22px;
+  }
+
+  .audience-benefit {
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .audience-benefit-number {
+    width: 36px;
+    height: 36px;
+  }
+
+  .audience-cta {
+    width: 100%;
   }
 
   .pain-grid,

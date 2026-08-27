@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260826a">
+    <link rel="stylesheet" href="./styles.css?v=20260827c">
     <script>
       (function () {
         var storedTheme = localStorage.getItem("terrafuse-theme");
@@ -20,15 +20,15 @@
   <body>
     <header class="site-header" aria-label="Primary navigation">
       <div class="shell header-inner">
-        <a class="brand" href="#top" aria-label="TerraFuse QStrata home">
+        <a class="brand" href="#top" aria-label="TerraFuse QStrata home" data-brand-link>
           <img class="brand-logo" src="../images/logo_main.png" alt="TerraFuse logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
           <span class="brand-fallback" aria-hidden="true">TerraFuse</span>
         </a>
         <nav class="nav-links" aria-label="Page sections">
-          <a href="#ev-charging">EV Charging</a>
-          <a href="#visitor-parking">Visitor Parking</a>
-          <a href="#why-terrafuse">Why TerraFuse</a>
-          <a href="#free-review">Free Review</a>
+          <a href="#ev-charging" data-nav-item="audiences">EV Charging</a>
+          <a href="#visitor-parking" data-nav-item="ev">Visitor Parking</a>
+          <a href="#why-terrafuse" data-nav-item="parking">Why TerraFuse</a>
+          <a href="#free-review" data-nav-item="review">Free Review</a>
         </nav>
         <div class="header-actions">
           <button class="theme-toggle" type="button" aria-label="Switch color theme" aria-pressed="false">
@@ -57,18 +57,18 @@
             <h1 data-org-heading>EV Charging and Visitor Parking<br>Solutions for Strata Buildings</h1>
             <p class="hero-subhead" data-org-subheadline>Fully managed building amenities for body corporate communities, designed to reduce admin, improve fairness, and help strata managers support future-ready buildings.</p>
             <div class="hero-actions">
-              <a class="button" href="#lead-form">Book a Free Building Suitability Review</a>
+              <a class="button" href="#lead-form" data-hero-primary-cta>Book a Free Building Suitability Review</a>
               <a class="button button-secondary" href="#free-review" data-org-secondary-cta>Explore TerraFuse events</a>
             </div>
           </div>
           <div class="hero-visual reveal">
             <div class="image-card hero-image-card">
-              <video autoplay muted loop playsinline preload="metadata" poster="../images/jenkinswithbollard.jpg" aria-label="TerraFuse EV charging and visitor parking in action">
+              <video autoplay muted loop playsinline preload="metadata" poster="../images/PXL_20251129_035805808.MP.jpg" aria-label="TerraFuse EV charging and visitor parking in action" data-hero-media>
                 <source src="../videos/LP%20Hero%20section%20video.mp4?v=20260529d" type="video/mp4">
               </video>
               <div class="hero-stat">
-                <strong>Fully managed</strong>
-                <span>EV charging and visitor parking support for strata communities.</span>
+                <strong data-hero-stat-heading>Fully managed</strong>
+                <span data-hero-stat-copy>EV charging and visitor parking support for strata communities.</span>
               </div>
             </div>
           </div>
@@ -94,6 +94,17 @@
         </div>
       </section>
 
+      <section class="section audience-section" id="audiences" hidden>
+        <div class="shell">
+          <div class="section-heading reveal">
+            <p class="eyebrow" data-audience-eyebrow></p>
+            <h2 data-audience-heading></h2>
+            <p data-audience-introduction></p>
+          </div>
+          <div class="audience-explorer reveal" data-audience-explorer></div>
+        </div>
+      </section>
+
       <section class="section organization-section" id="organization-focus">
         <div class="shell organization-panel reveal">
           <p class="eyebrow" data-org-section-eyebrow>Events and partnerships</p>
@@ -105,10 +116,10 @@
       <section class="section split-section" id="ev-charging">
         <div class="shell split-grid">
           <div class="content-column reveal">
-            <p class="eyebrow">Solution One</p>
-            <h2>Communal EV charging</h2>
-            <p>TerraFuse provides a turnkey communal EV charging solution for apartment and body corporate communities. We help buildings move from one-off charger requests to a managed, scalable infrastructure model.</p>
-            <ul class="check-list">
+            <p class="eyebrow" data-ev-eyebrow>Solution One</p>
+            <h2 data-ev-heading>Communal EV charging</h2>
+            <p data-ev-introduction>TerraFuse provides a turnkey communal EV charging solution for apartment and body corporate communities. We help buildings move from one-off charger requests to a managed, scalable infrastructure model.</p>
+            <ul class="check-list" data-ev-services>
               <li>Site assessment and feasibility review.</li>
               <li>Charger and infrastructure planning.</li>
               <li>Installation and commissioning.</li>
@@ -120,7 +131,7 @@
           </div>
           <div class="media-stack reveal">
             <div class="image-card">
-              <img src="../images/pxl_20250113_070030442.mp.jpg" alt="Communal EV charging bays in a strata basement" loading="lazy" onerror="this.closest('.image-card').classList.add('image-missing');">
+              <img src="../images/pxl_20250113_070030442.mp.jpg" alt="Communal EV charging bays in a strata basement" loading="lazy" data-ev-image onerror="this.closest('.image-card').classList.add('image-missing');">
             </div>
             <div class="phone-card">
               <img src="../images/app.png" alt="TerraFuse mobile app screen" loading="lazy" onerror="this.closest('.phone-card').classList.add('image-missing');">
@@ -128,7 +139,7 @@
           </div>
         </div>
         <div class="shell">
-          <div class="feature-grid reveal">
+          <div class="feature-grid reveal" data-ev-features>
             <article class="feature-card"><h3>No upfront installation cost to strata</h3><p>TerraFuse helps remove the capital cost barrier that often stops committees from acting.</p></article>
             <article class="feature-card"><h3>User-pays charging</h3><p>EV users pay for the service they use.</p></article>
             <article class="feature-card"><h3>Fair to non-EV residents</h3><p>The cost is not spread across residents who do not use EV charging.</p></article>
@@ -140,16 +151,16 @@
       <section class="section split-section alt" id="visitor-parking">
         <div class="shell split-grid reverse">
           <div class="content-column reveal">
-            <p class="eyebrow">Solution Two</p>
-            <h2>Visitor parking management</h2>
-            <p>Visitor parking is one of the most common friction points in strata communities. TerraFuse helps buildings manage shared parking more fairly through app-based booking, hardwired smart bollards, flexible access rules and operational support.</p>
+            <p class="eyebrow" data-parking-eyebrow>Solution Two</p>
+            <h2 data-parking-heading>Visitor parking management</h2>
+            <p data-parking-introduction>Visitor parking is one of the most common friction points in strata communities. TerraFuse helps buildings manage shared parking more fairly through app-based booking, hardwired smart bollards, flexible access rules and operational support.</p>
           </div>
           <div class="image-card reveal">
-            <img src="../images/Turrella.jpg" alt="Visitor parking bays with TerraFuse hardwired smart bollards" loading="lazy" onerror="this.closest('.image-card').classList.add('image-missing');">
+            <img src="../images/Turrella.jpg" alt="Visitor parking bays with TerraFuse hardwired smart bollards" loading="lazy" data-parking-image onerror="this.closest('.image-card').classList.add('image-missing');">
           </div>
         </div>
         <div class="shell">
-          <div class="feature-grid reveal">
+          <div class="feature-grid reveal" data-parking-features>
             <article class="feature-card"><h3>Fewer disputes</h3><p>Residents have a clearer way to book and use visitor spaces.</p></article>
             <article class="feature-card"><h3>Less manual intervention</h3><p>TerraFuse supports the system so managers are not left to administer every parking issue.</p></article>
             <article class="feature-card"><h3>Fairer use of limited spaces</h3><p>Booking rules and access control help reduce overstays and unauthorised parking.</p></article>
@@ -161,11 +172,11 @@
       <section class="section why-section" id="why-terrafuse">
         <div class="shell why-grid">
           <div class="section-heading left reveal">
-            <p class="eyebrow">Why TerraFuse</p>
-            <h2>Designed to reduce workload, not add to it.</h2>
-            <p>TerraFuse helps strata managers offer modern building amenities without taking on the operational burden. From assessment and installation to billing, monitoring, support and maintenance, the model is designed to be practical for committees and simple for residents.</p>
+            <p class="eyebrow" data-why-eyebrow>Why TerraFuse</p>
+            <h2 data-why-heading>Designed to reduce workload, not add to it.</h2>
+            <p data-why-copy>TerraFuse helps strata managers offer modern building amenities without taking on the operational burden. From assessment and installation to billing, monitoring, support and maintenance, the model is designed to be practical for committees and simple for residents.</p>
           </div>
-          <ul class="check-list benefit-list reveal" aria-label="TerraFuse benefits">
+          <ul class="check-list benefit-list reveal" aria-label="TerraFuse benefits" data-why-benefits>
             <li>Less admin</li>
             <li>Fewer complaints</li>
             <li>Committee-ready model</li>
@@ -179,11 +190,11 @@
       <section class="section review-section" id="free-review">
         <div class="shell review-grid">
           <div class="review-copy reveal">
-            <p class="eyebrow">Free Review</p>
-            <h2>Book a free TerraFuse Building Suitability Review.</h2>
-            <p class="lead">Book a free TerraFuse Building Suitability Review and find out whether the building or portfolio is suitable for communal EV charging, visitor parking management, or both.</p>
-            <h3>The review can cover</h3>
-            <ul class="check-list">
+            <p class="eyebrow" data-review-eyebrow>Free Review</p>
+            <h2 data-review-heading>Book a free TerraFuse Building Suitability Review.</h2>
+            <p class="lead" data-review-lead>Book a free TerraFuse Building Suitability Review and find out whether the building or portfolio is suitable for communal EV charging, visitor parking management, or both.</p>
+            <h3 data-review-coverage-heading>The review can cover</h3>
+            <ul class="check-list" data-review-coverage>
               <li>EV charging demand and resident needs.</li>
               <li>Existing car park layout.</li>
               <li>Visitor parking pressure points.</li>
@@ -197,8 +208,8 @@
           <form class="lead-form reveal" id="lead-form" novalidate>
             <input type="hidden" name="eventName" value="TerraFuse Events" data-org-default-event-name>
             <div class="form-heading">
-              <h2>Building Suitability Review request</h2>
-              <p>Required fields are marked with an asterisk.</p>
+              <h2 data-form-heading>Building Suitability Review request</h2>
+              <p data-form-introduction>Required fields are marked with an asterisk.</p>
             </div>
             <div class="form-grid">
               <label>
@@ -206,8 +217,9 @@
                 <input type="text" name="fullName" autocomplete="name" required aria-required="true">
               </label>
               <label>
-                <span>Company *</span>
+                <span data-form-building-label>Company *</span>
                 <input type="text" name="company" autocomplete="organization" required aria-required="true">
+                <small class="field-helper" data-form-building-helper hidden></small>
               </label>
               <label>
                 <span>Email *</span>
@@ -218,7 +230,7 @@
                 <input type="tel" name="mobile" autocomplete="tel">
               </label>
               <label>
-                <span>Number of buildings under management</span>
+                <span data-form-building-count-label>Number of buildings under management</span>
                 <input type="number" name="buildingCount" min="0" inputmode="numeric">
               </label>
               <label>
@@ -236,7 +248,7 @@
                 <input type="text" name="followUpTime" placeholder="For example, weekday morning">
               </label>
               <label class="full-span">
-                <span>Optional note</span>
+                <span data-form-note-label>Optional note</span>
                 <textarea name="note" rows="4"></textarea>
               </label>
               <label class="checkbox-field full-span">
@@ -245,12 +257,12 @@
               </label>
               <label class="checkbox-field full-span">
                 <input type="checkbox" name="marketingConsent" value="yes">
-                <span>I would also like to receive future TerraFuse updates, event invitations, and related information. I can unsubscribe at any time.</span>
+                <span data-form-marketing-consent>I would also like to receive future TerraFuse updates, event invitations, and related information. I can unsubscribe at any time.</span>
               </label>
             </div>
             <p class="form-error" role="alert" hidden>Please complete the required fields with valid details.</p>
-            <p class="form-success" role="status" hidden>Thank you — your Building Suitability Review request has been received. The TerraFuse team will follow up with you after the event.</p>
-            <button class="button form-button" type="submit">Book a Free Building Suitability Review</button>
+            <p class="form-success" role="status" hidden data-form-success>Thank you — your Building Suitability Review request has been received. The TerraFuse team will follow up with you after the event.</p>
+            <button class="button form-button" type="submit" data-default-label="Book a Free Building Suitability Review">Book a Free Building Suitability Review</button>
           </form>
         </div>
       </section>
@@ -264,12 +276,12 @@
         </div>
         <div>
           <p class="footer-context" data-org-footer-context>TerraFuse Events</p>
-          <p>EV charging and visitor parking, fully managed for strata communities.</p>
+          <p data-footer-copy>EV charging and visitor parking, fully managed for strata communities.</p>
         </div>
         <p class="copyright">© <span id="year"></span> TerraFuse. All rights reserved.</p>
       </div>
     </footer>
 
-    <script src="./main.js?v=20260826a" type="module"></script>
+    <script src="./main.js?v=20260827e" type="module"></script>
   </body>
 </html>
