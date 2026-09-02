@@ -74,6 +74,8 @@ add_action('template_redirect', function () {
         'utm_campaign' => 'building_solutions_ab_2026',
         'utm_content'  => $video_sources[$route],
         'utm_id'       => 'building_solutions_layout_2026',
+        'tf_event'      => $route,
+        'tf_event_name' => 'brisbane-channel collab',
     ), home_url($destination_path));
 
     wp_safe_redirect($destination, 302, 'TerraFuse A/B Test');
@@ -283,6 +285,8 @@ No form identity fields are included in the iframe messages. Name, email, mobile
 ## 4. Release checks
 
 - Test all three branded tracking links in private windows and confirm `utm_content` is respectively `building_review_video`, `free_building_review_video`, or `future_ready_buildings_video`.
+- Confirm all three broad-campaign leads store `event_name` as `brisbane-channel collab`.
+- Confirm `event_slug` is respectively `building-review`, `free-building-review`, or `future-ready-buildings`.
 - Clear the `tf_building_solutions_variant` cookie between assignment tests.
 - Confirm the same browser remains on the same layout for repeat visits during the 30-day window.
 - Confirm Variant A keeps the review form at the bottom and Variant B places it directly after the header.

@@ -3,7 +3,7 @@ import {
   getAttribution,
   getAttributionMeta,
   getOrganizationConfig
-} from "./attribution.js?v=20260827e";
+} from "./attribution.js?v=20260902a";
 
 const root = document.documentElement;
 const toggle = document.querySelector(".theme-toggle");
@@ -385,7 +385,7 @@ function applyPageLayout(config) {
 
 function collectFormData(formElement) {
   const data = Object.fromEntries(new FormData(formElement).entries());
-  const trackingEventName = attributionMeta.eventNameSource === "tf_event_name"
+  const trackingEventName = ["tf_event_name", "broad_campaign"].includes(attributionMeta.eventNameSource)
     ? attribution.event_name
     : null;
   const formEventName = data.eventName || organizationConfig.defaultEventName;

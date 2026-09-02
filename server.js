@@ -16,6 +16,14 @@ const emailFrom = process.env.EMAIL_FROM || "TerraFuse <noreply@terrafuse.com.au
 const publicSiteUrl = process.env.PUBLIC_SITE_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
 const emailLogoUrl = process.env.EMAIL_LOGO_URL;
 const configuredEventName = process.env.EVENT_NAME;
+const broadCampaignEventName = "brisbane-channel collab";
+const broadLandingPageVariants = new Set(["broad_standard", "broad_form_first"]);
+const broadCampaignVideoRoutes = {
+  building_review_video: "building-review",
+  free_building_review_video: "free-building-review",
+  future_ready_buildings_video: "future-ready-buildings"
+};
+const broadCampaignEventSlugs = new Set(Object.values(broadCampaignVideoRoutes));
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -108,15 +116,35 @@ function cleanNullableString(value, maxLength = 500) {
   return text || null;
 }
 
+function resolveBroadCampaignEventSlug(eventSlug, utmContent) {
+  const normalizedEventSlug = cleanString(eventSlug, 160)
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, "");
+
+  if (broadCampaignEventSlugs.has(normalizedEventSlug)) {
+    return normalizedEventSlug;
+  }
+
+  const normalizedUtmContent = cleanString(utmContent, 260).toLowerCase();
+  return broadCampaignVideoRoutes[normalizedUtmContent] || null;
+}
+
 function cleanLeadPayload(payload) {
   const trackingEventName = cleanString(payload.trackingEventName, 160);
+  const landingPageVariant = cleanNullableString(payload.landing_page_variant, 120);
+  const utmContent = cleanNullableString(payload.utm_content, 260);
+  const isBroadCampaignLead = broadLandingPageVariants.has(landingPageVariant);
   const defaultEventName = cleanString(configuredEventName || payload.eventName || "TerraFuse Events", 160);
   const lead = {
     organization_slug: cleanNullableString(payload.organization_slug, 120),
     organization_name: cleanNullableString(payload.organization_name, 160),
-    event_slug: cleanNullableString(payload.event_slug, 160),
-    event_name: trackingEventName || defaultEventName,
-    landing_page_variant: cleanNullableString(payload.landing_page_variant, 120),
+    event_slug: isBroadCampaignLead
+      ? resolveBroadCampaignEventSlug(payload.event_slug, utmContent)
+      : cleanNullableString(payload.event_slug, 160),
+    event_name: isBroadCampaignLead
+      ? broadCampaignEventName
+      : (trackingEventName || defaultEventName),
+    landing_page_variant: landingPageVariant,
     landing_page_path: cleanNullableString(payload.landing_page_path, 500),
     landing_page_url: cleanNullableString(payload.landing_page_url, 1000),
     iframe_url: cleanNullableString(payload.iframe_url, 1000),
@@ -126,7 +154,7 @@ function cleanLeadPayload(payload) {
     utm_source: cleanNullableString(payload.utm_source, 160),
     utm_medium: cleanNullableString(payload.utm_medium, 160),
     utm_campaign: cleanNullableString(payload.utm_campaign, 260),
-    utm_content: cleanNullableString(payload.utm_content, 260),
+    utm_content: utmContent,
     utm_term: cleanNullableString(payload.utm_term, 260),
     utm_id: cleanNullableString(payload.utm_id, 160),
     full_name: cleanString(payload.fullName, 160),
@@ -245,7 +273,7 @@ function customerEmailSignatureHtml() {
 }
 
 function isBroadBuildingSolutionsLead(lead) {
-  return ["broad_standard", "broad_form_first"].includes(lead.landing_page_variant);
+  return broadLandingPageVariants.has(lead.landing_page_variant);
 }
 
 function leadSummaryText(lead) {

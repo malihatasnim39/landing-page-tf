@@ -1,4 +1,11 @@
 const ATTRIBUTION_STORAGE_KEY = "terrafuse-last-touch-attribution";
+const BROAD_CAMPAIGN_EVENT_NAME = "brisbane-channel collab";
+const BROAD_CAMPAIGN_VIDEO_ROUTES = {
+  building_review_video: "building-review",
+  free_building_review_video: "free-building-review",
+  future_ready_buildings_video: "future-ready-buildings"
+};
+const BROAD_CAMPAIGN_EVENT_SLUGS = new Set(Object.values(BROAD_CAMPAIGN_VIDEO_ROUTES));
 
 const TRACKED_QUERY_PARAMS = [
   "organization_slug",
@@ -288,14 +295,14 @@ const ROUTE_CONFIGS = {
     landing_page_variant: "broad_standard",
     layout: "standard",
     contentMode: "broad",
-    defaultEventName: "TerraFuse Building Solutions"
+    defaultEventName: BROAD_CAMPAIGN_EVENT_NAME
   },
   "/building-solutions-review-first": {
     organization_slug: "general",
     landing_page_variant: "broad_form_first",
     layout: "review-first",
     contentMode: "broad",
-    defaultEventName: "TerraFuse Building Solutions"
+    defaultEventName: BROAD_CAMPAIGN_EVENT_NAME
   }
 };
 
@@ -341,6 +348,19 @@ function normalizePathname(value) {
   }
 
   return pathname.replace(/\/+$/, "");
+}
+
+function normalizeBroadCampaignEventSlug(value) {
+  const normalized = cleanValue(value)?.toLowerCase().replace(/^\/+|\/+$/g, "");
+  if (!normalized) {
+    return null;
+  }
+
+  if (BROAD_CAMPAIGN_EVENT_SLUGS.has(normalized)) {
+    return normalized;
+  }
+
+  return BROAD_CAMPAIGN_VIDEO_ROUTES[normalized] || null;
 }
 
 function getRouteConfig() {
@@ -459,8 +479,26 @@ export function getAttribution() {
     || current.landing_page_variant
     || activeOrganizationConfig.landing_page_variant;
 
-  if (eventNameSource) {
-    merged.__event_name_source = eventNameSource;
+  if (routeConfig?.contentMode === "broad") {
+    // Broad campaign routes are authoritative. Do not let an old QStrata
+    // localStorage value or Vercel EVENT_NAME override this campaign.
+    merged.event_name = BROAD_CAMPAIGN_EVENT_NAME;
+    merged.event_slug = normalizeBroadCampaignEventSlug(current.event_slug)
+      || normalizeBroadCampaignEventSlug(current.utm_content)
+      || normalizeBroadCampaignEventSlug(stored.event_slug)
+      || normalizeBroadCampaignEventSlug(stored.utm_content);
+    merged.__event_name_source = "broad_campaign";
+  } else {
+    // Do not carry Brisbane campaign identity into retained event routes.
+    if (merged.__event_name_source === "broad_campaign") {
+      delete merged.__event_name_source;
+      merged.event_name = current.event_name;
+      merged.event_slug = current.event_slug;
+    }
+
+    if (eventNameSource && eventNameSource !== "broad_campaign") {
+      merged.__event_name_source = eventNameSource;
+    }
   }
 
   setStoredAttribution(merged);
