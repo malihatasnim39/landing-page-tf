@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260827c">
+    <link rel="stylesheet" href="./styles.css?v=20260910a">
     <script>
       (function () {
         var storedTheme = localStorage.getItem("terrafuse-theme");
@@ -56,6 +56,7 @@
             <p class="eyebrow" data-org-eyebrow>TerraFuse Events</p>
             <h1 data-org-heading>EV Charging and Visitor Parking<br>Solutions for Strata Buildings</h1>
             <p class="hero-subhead" data-org-subheadline>Fully managed building amenities for body corporate communities, designed to reduce admin, improve fairness, and help strata managers support future-ready buildings.</p>
+            <p class="hero-local-context" data-hero-local-context hidden></p>
             <div class="hero-actions">
               <a class="button" href="#lead-form" data-hero-primary-cta>Book a Free Building Suitability Review</a>
               <a class="button button-secondary" href="#free-review" data-org-secondary-cta>Explore TerraFuse events</a>
@@ -213,7 +214,7 @@
             </div>
             <div class="form-grid">
               <label>
-                <span>Full name *</span>
+                <span data-form-name-label>Full name *</span>
                 <input type="text" name="fullName" autocomplete="name" required aria-required="true">
               </label>
               <label>
@@ -225,6 +226,26 @@
                 <span>Email *</span>
                 <input type="email" name="email" autocomplete="email" required aria-required="true">
               </label>
+              <label data-broad-form-field hidden>
+                <span data-form-suburb-label>Suburb *</span>
+                <input type="text" name="suburb" autocomplete="address-level2" disabled>
+              </label>
+              <label data-broad-form-field hidden>
+                <span data-form-role-label>Role *</span>
+                <select name="role" disabled data-form-role-select>
+                  <option value="">Select an option</option>
+                </select>
+              </label>
+              <label>
+                <span>Main interest *</span>
+                <select name="mainInterest" required aria-required="true" data-form-interest-select>
+                  <option value="">Select an option</option>
+                  <option>EV charging</option>
+                  <option>Visitor parking</option>
+                  <option>Both</option>
+                  <option>Not sure yet</option>
+                </select>
+              </label>
               <label>
                 <span>Mobile</span>
                 <input type="tel" name="mobile" autocomplete="tel">
@@ -233,18 +254,8 @@
                 <span data-form-building-count-label>Number of buildings under management</span>
                 <input type="number" name="buildingCount" min="0" inputmode="numeric">
               </label>
-              <label>
-                <span>Main interest *</span>
-                <select name="mainInterest" required aria-required="true">
-                  <option value="">Select an option</option>
-                  <option>EV charging</option>
-                  <option>Visitor parking</option>
-                  <option>Both</option>
-                  <option>Not sure yet</option>
-                </select>
-              </label>
               <label class="full-span">
-                <span>Preferred follow-up time</span>
+                <span data-form-follow-up-label>Preferred follow-up time</span>
                 <input type="text" name="followUpTime" placeholder="For example, weekday morning">
               </label>
               <label class="full-span">
@@ -282,6 +293,6 @@
       </div>
     </footer>
 
-    <script src="./main.js?v=20260902a" type="module"></script>
+    <script src="./main.js?v=20260910a" type="module"></script>
   </body>
 </html>

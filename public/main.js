@@ -3,7 +3,7 @@ import {
   getAttribution,
   getAttributionMeta,
   getOrganizationConfig
-} from "./attribution.js?v=20260902a";
+} from "./attribution.js?v=20260910a";
 
 const root = document.documentElement;
 const toggle = document.querySelector(".theme-toggle");
@@ -129,6 +129,23 @@ function replaceFeatureCards(selector, features) {
 
     card.append(heading, copy);
     return card;
+  }));
+}
+
+function replaceSelectOptions(selector, options) {
+  const select = document.querySelector(selector);
+  if (!select) {
+    return;
+  }
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select an option";
+  select.replaceChildren(placeholder, ...options.map((label) => {
+    const option = document.createElement("option");
+    option.value = label;
+    option.textContent = label;
+    return option;
   }));
 }
 
@@ -305,6 +322,11 @@ function applyBroadContent(config) {
   setText("[data-org-eyebrow]", config.hero.eyebrow);
   setMultilineText("[data-org-heading]", config.hero.heading);
   setText("[data-org-subheadline]", config.hero.subheadline);
+  const localContext = document.querySelector("[data-hero-local-context]");
+  if (localContext) {
+    localContext.textContent = config.hero.localContext;
+    localContext.hidden = false;
+  }
   setText("[data-hero-primary-cta]", config.hero.primaryCta);
   setText("[data-org-secondary-cta]", config.hero.secondaryCta);
   document.querySelector("[data-org-secondary-cta]")?.setAttribute("href", config.hero.secondaryCtaHref);
@@ -353,8 +375,12 @@ function applyBroadContent(config) {
 
   setText("[data-form-heading]", config.form.heading);
   setText("[data-form-introduction]", config.form.introduction);
+  setText("[data-form-name-label]", config.form.nameLabel);
   setText("[data-form-building-label]", config.form.buildingLabel);
+  setText("[data-form-suburb-label]", config.form.suburbLabel);
+  setText("[data-form-role-label]", config.form.roleLabel);
   setText("[data-form-building-count-label]", config.form.buildingCountLabel);
+  setText("[data-form-follow-up-label]", config.form.followUpTimeLabel);
   setText("[data-form-note-label]", config.form.noteLabel);
   setText("[data-form-marketing-consent]", config.form.marketingConsent);
   setText("[data-form-success]", config.form.successMessage);
@@ -364,6 +390,18 @@ function applyBroadContent(config) {
     helper.textContent = config.form.buildingHelper;
     helper.hidden = false;
   }
+
+  document.querySelectorAll("[data-broad-form-field]").forEach((field) => {
+    field.hidden = false;
+    const control = field.querySelector("input, select, textarea");
+    if (control) {
+      control.disabled = false;
+      control.required = true;
+      control.setAttribute("aria-required", "true");
+    }
+  });
+  replaceSelectOptions("[data-form-role-select]", config.form.roleOptions);
+  replaceSelectOptions("[data-form-interest-select]", config.form.mainInterestOptions);
 
   const submitButton = form?.querySelector("button[type='submit']");
   if (submitButton) {

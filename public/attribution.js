@@ -1,5 +1,6 @@
 const ATTRIBUTION_STORAGE_KEY = "terrafuse-last-touch-attribution";
 const BROAD_CAMPAIGN_EVENT_NAME = "brisbane-channel collab";
+const BROAD_CAMPAIGN_ORGANIZATION_NAME = "TerraFuse";
 const BROAD_CAMPAIGN_VIDEO_ROUTES = {
   building_review_video: "building-review",
   free_building_review_video: "free-building-review",
@@ -72,8 +73,8 @@ export const ORGANIZATION_CONFIGS = {
 };
 
 export const BROAD_PAGE_CONTENT = {
-  title: "EV Charging & Visitor Parking for Brisbane Buildings | TerraFuse",
-  description: "Fully managed EV charging and smart visitor parking for Brisbane apartments, body corporate communities and mixed-use buildings. Book a free building suitability review.",
+  title: "EV Charging & Visitor Parking for Brisbane Apartments | TerraFuse",
+  description: "Practical EV charging and smarter visitor parking for Brisbane apartments and body corporate communities. Book a free building suitability review.",
   navigation: [
     { key: "audiences", label: "Who It’s For", href: "#audiences" },
     { key: "ev", label: "EV Charging", href: "#ev-charging" },
@@ -81,9 +82,10 @@ export const BROAD_PAGE_CONTENT = {
     { key: "review", label: "Free Review", href: "#free-review" }
   ],
   hero: {
-    eyebrow: "TerraFuse x The Brisbane Channel",
-    heading: "EV charging and visitor parking, made simple for your building.",
-    subheadline: "TerraFuse helps residents, strata managers and building owners introduce fully managed EV charging and smarter visitor parking—with practical planning, fair access and ongoing support.",
+    eyebrow: "TerraFuse x THE Brisbane Channel",
+    heading: "Helping Brisbane Apartments Prepare for EV Charging and Smarter Visitor Parking",
+    subheadline: "Practical EV charging and visitor parking solutions for apartment and body corporate communities—designed to reduce admin, improve fairness and help buildings prepare for the future.",
+    localContext: "As Brisbane and South East Queensland continue to grow, apartment buildings are increasingly facing questions around EV charging, visitor parking and future-ready car park infrastructure.",
     primaryCta: "Book a Free Building Review",
     secondaryCta: "See What’s in It for You",
     secondaryCtaHref: "#audiences",
@@ -227,7 +229,7 @@ export const BROAD_PAGE_CONTENT = {
   whyTerraFuse: {
     eyebrow: "Why TerraFuse",
     heading: "One partner from the first review to ongoing operation.",
-    copy: "TerraFuse brings the planning, technology and day-to-day operation together. The result is a practical pathway for Brisbane residents, body corporate communities, building managers and owners—not another disconnected system for the building to manage.",
+    copy: "TerraFuse brings the planning, technology and day-to-day operation together. The result is a practical pathway for Brisbane residents, body corporate committees, building and strata managers, developers and owners—not another disconnected system for the building to manage.",
     benefits: [
       "Building-first planning",
       "Fully managed operation",
@@ -240,7 +242,7 @@ export const BROAD_PAGE_CONTENT = {
   review: {
     eyebrow: "Free Building Review",
     heading: "Is your building ready for EV charging or smarter visitor parking?",
-    lead: "Tell us a little about your Brisbane apartment, mixed-use property or building portfolio. TerraFuse will help identify a practical next step—whether you are a resident raising the idea, a strata manager supporting a committee, or an owner planning ahead.",
+    lead: "Tell us a little about your Brisbane apartment, mixed-use property or development. TerraFuse will help identify a practical next step—whether you are a committee member, building or strata manager, developer, owner or resident.",
     coverageHeading: "The review can cover",
     coverage: [
       "Current resident or tenant interest",
@@ -255,10 +257,23 @@ export const BROAD_PAGE_CONTENT = {
   form: {
     heading: "Request your free building review",
     introduction: "Tell us about your building. Required fields are marked with an asterisk.",
-    buildingLabel: "Building or organisation *",
-    buildingHelper: "Residents can enter their building name or suburb.",
-    buildingCountLabel: "Number of buildings, if applicable",
-    noteLabel: "Tell us about your building or enquiry",
+    nameLabel: "Name *",
+    buildingLabel: "Building / company name *",
+    buildingHelper: "Apartment owners and residents can enter their building name.",
+    suburbLabel: "Suburb *",
+    roleLabel: "Role *",
+    roleOptions: [
+      "Body Corporate / Committee",
+      "Building Manager",
+      "Strata Manager",
+      "Property Developer",
+      "Apartment Owner / Resident",
+      "Other"
+    ],
+    buildingCountLabel: "Approximate number of units or parking bays",
+    mainInterestOptions: ["EV Charging", "Visitor Parking", "Both", "Not Sure"],
+    followUpTimeLabel: "Preferred contact time",
+    noteLabel: "Message",
     marketingConsent: "I would also like to receive future TerraFuse updates and related information. I can unsubscribe at any time.",
     submitLabel: "Book My Free Building Review",
     successMessage: "Thank you—your Building Suitability Review request has been received. The TerraFuse team will contact you shortly."
@@ -483,6 +498,7 @@ export function getAttribution() {
     // Broad campaign routes are authoritative. Do not let an old QStrata
     // localStorage value or Vercel EVENT_NAME override this campaign.
     merged.event_name = BROAD_CAMPAIGN_EVENT_NAME;
+    merged.organization_name = BROAD_CAMPAIGN_ORGANIZATION_NAME;
     merged.event_slug = normalizeBroadCampaignEventSlug(current.event_slug)
       || normalizeBroadCampaignEventSlug(current.utm_content)
       || normalizeBroadCampaignEventSlug(stored.event_slug)

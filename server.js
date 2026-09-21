@@ -134,6 +134,14 @@ function cleanLeadPayload(payload) {
   const landingPageVariant = cleanNullableString(payload.landing_page_variant, 120);
   const utmContent = cleanNullableString(payload.utm_content, 260);
   const isBroadCampaignLead = broadLandingPageVariants.has(landingPageVariant);
+  const suburb = cleanString(payload.suburb, 160);
+  const role = cleanString(payload.role, 160);
+  const message = cleanString(payload.note, 1500);
+  const broadEnquiryDetails = [
+    `Suburb: ${suburb}`,
+    `Role: ${role}`,
+    `Message: ${message || "Not provided"}`
+  ].join("\n");
   const defaultEventName = cleanString(configuredEventName || payload.eventName || "TerraFuse Events", 160);
   const lead = {
     organization_slug: cleanNullableString(payload.organization_slug, 120),
@@ -166,7 +174,7 @@ function cleanLeadPayload(payload) {
       : Number(payload.buildingCount),
     main_interest: cleanString(payload.mainInterest, 80),
     preferred_follow_up_time: cleanString(payload.followUpTime, 160),
-    note: cleanString(payload.note, 2000),
+    note: isBroadCampaignLead ? broadEnquiryDetails : cleanString(payload.note, 2000),
     contact_consent: payload.contactConsent === true,
     marketing_consent: payload.marketingConsent === true
   };
@@ -181,6 +189,7 @@ function cleanLeadPayload(payload) {
     || !lead.company
     || !emailPattern.test(lead.email)
     || !lead.main_interest
+    || (isBroadCampaignLead && (!suburb || !role))
     || !lead.contact_consent
     || !validBuildingCount
   ) {
@@ -281,13 +290,13 @@ function leadSummaryText(lead) {
   return [
     `Event: ${lead.event_name}`,
     `Full name: ${lead.full_name}`,
-    `${isBroadLead ? "Building or organisation" : "Company"}: ${lead.company}`,
+    `${isBroadLead ? "Building / company name" : "Company"}: ${lead.company}`,
     `Email: ${lead.email}`,
     `Mobile: ${lead.mobile}`,
-    `${isBroadLead ? "Number of buildings" : "Number of buildings under management"}: ${lead.building_count ?? "Not provided"}`,
+    `${isBroadLead ? "Approximate units or parking bays" : "Number of buildings under management"}: ${lead.building_count ?? "Not provided"}`,
     `Main interest: ${lead.main_interest}`,
-    `Preferred follow-up time: ${lead.preferred_follow_up_time || "Not provided"}`,
-    `${isBroadLead ? "Building or enquiry details" : "Optional note"}: ${lead.note || "Not provided"}`,
+    `${isBroadLead ? "Preferred contact time" : "Preferred follow-up time"}: ${lead.preferred_follow_up_time || "Not provided"}`,
+    `${isBroadLead ? "Suburb, role and message" : "Optional note"}: ${lead.note || "Not provided"}`,
     `Contact consent: ${lead.contact_consent ? "Yes" : "No"}`,
     `Marketing updates consent: ${lead.marketing_consent ? "Yes" : "No"}`
   ].join("\n");
@@ -313,13 +322,13 @@ function leadSummaryHtml(lead) {
       ${[
         ["Event", lead.event_name],
         ["Full name", lead.full_name],
-        [isBroadLead ? "Building or organisation" : "Company", lead.company],
+        [isBroadLead ? "Building / company name" : "Company", lead.company],
         ["Email", lead.email],
         ["Mobile", lead.mobile],
-        [isBroadLead ? "Number of buildings" : "Number of buildings under management", lead.building_count ?? "Not provided"],
+        [isBroadLead ? "Approximate units or parking bays" : "Number of buildings under management", lead.building_count ?? "Not provided"],
         ["Main interest", lead.main_interest],
-        ["Preferred follow-up time", lead.preferred_follow_up_time || "Not provided"],
-        [isBroadLead ? "Building or enquiry details" : "Optional note", lead.note || "Not provided"],
+        [isBroadLead ? "Preferred contact time" : "Preferred follow-up time", lead.preferred_follow_up_time || "Not provided"],
+        [isBroadLead ? "Suburb, role and message" : "Optional note", lead.note || "Not provided"],
         ["Contact consent", lead.contact_consent ? "Yes" : "No"],
         ["Marketing updates consent", lead.marketing_consent ? "Yes" : "No"]
       ].map(([label, value]) => `
