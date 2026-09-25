@@ -271,7 +271,7 @@ export const BROAD_PAGE_CONTENT = {
       "Other"
     ],
     buildingCountLabel: "Approximate number of units or parking bays",
-    mainInterestOptions: ["EV Charging", "Visitor Parking", "Both", "Not Sure"],
+    mainInterestOptions: ["EV charging", "Visitor parking", "Both", "Not sure yet"],
     followUpTimeLabel: "Preferred contact time",
     noteLabel: "Message",
     marketingConsent: "I would also like to receive future TerraFuse updates and related information. I can unsubscribe at any time.",
