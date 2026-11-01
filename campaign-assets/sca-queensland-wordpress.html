@@ -1,0 +1,100 @@
+<!-- Replace the existing iframe AND its message listener with this block. -->
+<iframe
+  id="tf-events-lp"
+  title="TerraFuse SCA Queensland Landing Page"
+  style="width:100%; min-height:100vh; border:0;"
+  loading="eager">
+</iframe>
+
+<script>
+(function () {
+  var iframe = document.getElementById("tf-events-lp");
+  if (!iframe) return;
+
+  var origin = "https://landing-page-tf.vercel.app";
+  var incoming = new URLSearchParams(window.location.search);
+  var params = new URLSearchParams();
+  var forwardedKeys = [
+    "utm_source", "utm_medium", "utm_campaign", "utm_content",
+    "utm_term", "utm_id", "tf_event", "tf_event_name"
+  ];
+  forwardedKeys.forEach(function (key) {
+    var value = incoming.get(key);
+    if (value && value.trim()) params.set(key, value);
+  });
+
+  var isBrochure = incoming.get("utm_source") === "sca_queensland"
+    && incoming.get("utm_medium") === "qr"
+    && incoming.get("utm_campaign") === "management_right_conference_2026_11_11"
+    && incoming.get("utm_content") === "event_brochure"
+    && incoming.get("tf_event") === "management-right-conference-2026-11-11";
+  var isTagged = forwardedKeys.some(function (key) {
+    return params.has(key);
+  });
+  var entryMethod = isBrochure ? "qr_brochure" : (isTagged ? "other_tagged" : "untagged");
+
+  params.set("organization_slug", "sca_queensland");
+  params.set("organization_name", "SCA Queensland");
+  params.set("landing_page_variant", "sca-queensland");
+  params.set("parent_path", window.location.pathname);
+  params.set("parent_url", window.location.href);
+
+  // These describe the app's fallback attribution, not GA4's session source.
+  // Set content/ID too so an untagged return does not retain an old brochure value.
+  var defaults = {
+    utm_source: isTagged ? "not_set" : "direct",
+    utm_medium: isTagged ? "not_set" : "organization_page",
+    utm_campaign: "sca_queensland_general",
+    utm_content: isTagged ? "not_set" : "organization_page",
+    utm_term: "not_set",
+    utm_id: params.get("utm_campaign") || "sca_queensland_general",
+    tf_event: "sca-queensland-general",
+    tf_event_name: "SCA Queensland General"
+  };
+  Object.keys(defaults).forEach(function (key) {
+    if (!params.has(key)) params.set(key, defaults[key]);
+  });
+
+  var eventNames = {
+    TF_LANDING_PAGE_VIEW: "tf_landing_page_view",
+    TF_FORM_STARTED: "tf_form_start",
+    TF_LEAD_SUBMITTED: "generate_lead"
+  };
+  var allowedKeys = [
+    "lead_organization", "lead_organization_name", "lead_event", "lead_event_name",
+    "landing_page_variant", "landing_page_path", "iframe_path",
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_id"
+  ];
+  var sentPageView = false;
+
+  function sendAnalytics(name, payload) {
+    // Use the Google tag already installed by Site Kit; do not install another tag.
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+    window.gtag("event", name, payload);
+  }
+
+  window.addEventListener("message", function (event) {
+    if (event.origin !== origin || event.source !== iframe.contentWindow || !event.data) return;
+    if (!Object.prototype.hasOwnProperty.call(eventNames, event.data.type)) return;
+    if (event.data.type === "TF_LANDING_PAGE_VIEW" && sentPageView) return;
+
+    var source = event.data.payload || {};
+    var payload = { entry_method: entryMethod };
+    allowedKeys.forEach(function (key) {
+      if (typeof source[key] === "string" && source[key]) payload[key] = source[key];
+    });
+    sendAnalytics(eventNames[event.data.type], payload);
+
+    if (event.data.type === "TF_LANDING_PAGE_VIEW") {
+      sentPageView = true;
+      // Count loaded visits from this brochure URL, including visitors who never submit.
+      if (isBrochure) sendAnalytics("tf_qr_landing_view", payload);
+    }
+  });
+
+  // Register the listener before loading the iframe so its initial message is received.
+  // The dedicated route is authoritative for SCA organization and page variant.
+  iframe.src = origin + "/sca-queensland?" + params.toString();
+})();
+</script>

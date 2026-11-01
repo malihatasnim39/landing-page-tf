@@ -149,6 +149,22 @@ function replaceSelectOptions(selector, options) {
   }));
 }
 
+function configureBuildingDetailsFields(config) {
+  const enabled = config.contentMode === "broad" || config.organization_slug === "sca_queensland";
+  document.querySelectorAll("[data-building-details-field]").forEach((field) => {
+    field.hidden = !enabled;
+    const control = field.querySelector("input, select, textarea");
+    if (control) {
+      control.disabled = !enabled;
+      control.required = enabled;
+      control.setAttribute("aria-required", String(enabled));
+    }
+  });
+  if (enabled) {
+    replaceSelectOptions("[data-form-role-select]", BROAD_PAGE_CONTENT.form.roleOptions);
+  }
+}
+
 function setImage(selector, source, alt) {
   const image = document.querySelector(selector);
   if (!image || !source) {
@@ -391,16 +407,6 @@ function applyBroadContent(config) {
     helper.hidden = false;
   }
 
-  document.querySelectorAll("[data-broad-form-field]").forEach((field) => {
-    field.hidden = false;
-    const control = field.querySelector("input, select, textarea");
-    if (control) {
-      control.disabled = false;
-      control.required = true;
-      control.setAttribute("aria-required", "true");
-    }
-  });
-  replaceSelectOptions("[data-form-role-select]", config.form.roleOptions);
   replaceSelectOptions("[data-form-interest-select]", config.form.mainInterestOptions);
 
   const submitButton = form?.querySelector("button[type='submit']");
@@ -535,6 +541,7 @@ applyOrganizationContent(organizationConfig);
 if (organizationConfig.contentMode === "broad") {
   applyBroadContent(BROAD_PAGE_CONTENT);
 }
+configureBuildingDetailsFields(organizationConfig);
 applyPageLayout(organizationConfig);
 applyTheme(root.dataset.theme || "light");
 postAnalyticsMessage("TF_LANDING_PAGE_VIEW");

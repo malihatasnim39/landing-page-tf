@@ -137,7 +137,7 @@ function cleanLeadPayload(payload) {
   const suburb = cleanString(payload.suburb, 160);
   const role = cleanString(payload.role, 160);
   const message = cleanString(payload.note, 1500);
-  const broadEnquiryDetails = [
+  const enquiryDetails = [
     `Suburb: ${suburb}`,
     `Role: ${role}`,
     `Message: ${message || "Not provided"}`
@@ -174,7 +174,8 @@ function cleanLeadPayload(payload) {
       : Number(payload.buildingCount),
     main_interest: cleanString(payload.mainInterest, 80),
     preferred_follow_up_time: cleanString(payload.followUpTime, 160),
-    note: isBroadCampaignLead ? broadEnquiryDetails : cleanString(payload.note, 2000),
+    // Keep these details in the existing note column; older event forms may omit them.
+    note: isBroadCampaignLead || suburb || role ? enquiryDetails : cleanString(payload.note, 2000),
     contact_consent: payload.contactConsent === true,
     marketing_consent: payload.marketingConsent === true
   };
@@ -296,7 +297,7 @@ function leadSummaryText(lead) {
     `${isBroadLead ? "Approximate units or parking bays" : "Number of buildings under management"}: ${lead.building_count ?? "Not provided"}`,
     `Main interest: ${lead.main_interest}`,
     `${isBroadLead ? "Preferred contact time" : "Preferred follow-up time"}: ${lead.preferred_follow_up_time || "Not provided"}`,
-    `${isBroadLead ? "Suburb, role and message" : "Optional note"}: ${lead.note || "Not provided"}`,
+    `${isBroadLead ? "Suburb, role and message" : "Enquiry details / note"}: ${lead.note || "Not provided"}`,
     `Contact consent: ${lead.contact_consent ? "Yes" : "No"}`,
     `Marketing updates consent: ${lead.marketing_consent ? "Yes" : "No"}`
   ].join("\n");
@@ -328,7 +329,7 @@ function leadSummaryHtml(lead) {
         [isBroadLead ? "Approximate units or parking bays" : "Number of buildings under management", lead.building_count ?? "Not provided"],
         ["Main interest", lead.main_interest],
         [isBroadLead ? "Preferred contact time" : "Preferred follow-up time", lead.preferred_follow_up_time || "Not provided"],
-        [isBroadLead ? "Suburb, role and message" : "Optional note", lead.note || "Not provided"],
+        [isBroadLead ? "Suburb, role and message" : "Enquiry details / note", lead.note || "Not provided"],
         ["Contact consent", lead.contact_consent ? "Yes" : "No"],
         ["Marketing updates consent", lead.marketing_consent ? "Yes" : "No"]
       ].map(([label, value]) => `
