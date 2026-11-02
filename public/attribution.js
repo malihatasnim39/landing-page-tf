@@ -293,7 +293,10 @@ const ROUTE_CONFIGS = {
   "/events": {
     organization_slug: "general",
     landing_page_variant: "events",
-    layout: "standard"
+    layout: "standard",
+    dynamicOrganization: true,
+    showSecondaryCta: false,
+    showBuildingDetails: true
   },
   "/sca-queensland": {
     organization_slug: "sca_queensland",
@@ -353,7 +356,7 @@ function normalizeOrganizationSlug(value) {
     return null;
   }
 
-  return slug.toLowerCase().replace(/-/g, "_");
+  return slug.toLowerCase().replace(/[\s-]+/g, "_");
 }
 
 function normalizePathname(value) {
@@ -453,6 +456,8 @@ export function getOrganizationConfig(attribution) {
     landing_page_variant: routeConfig?.landing_page_variant || organizationConfig.landing_page_variant,
     layout: routeConfig?.layout || "standard",
     contentMode: routeConfig?.contentMode || "organization",
+    showSecondaryCta: routeConfig?.showSecondaryCta !== false,
+    showBuildingDetails: routeConfig?.showBuildingDetails === true,
     defaultEventName: routeConfig?.defaultEventName || organizationConfig.defaultEventName
   };
 }
@@ -475,19 +480,29 @@ export function getAttribution() {
   const routeConfig = getRouteConfig();
   const eventNameSource = cleanValue(searchParams.get("tf_event_name"))
     ? "tf_event_name"
-    : (stored.__event_name_source || null);
+    : (routeConfig?.dynamicOrganization ? null : (stored.__event_name_source || null));
 
-  // Last-touch attribution: merge current non-empty query/page values over
-  // the previous stored attribution, but never erase a stored value with empty
-  // query parameters from later visits.
-  const merged = mergeNonEmpty(stored, current);
-  const activeOrganizationSlug = routeConfig?.organization_slug
-    || current.organization_slug
-    || ORGANIZATION_CONFIGS.general.organization_slug;
+  // Shared event pages describe the current entry. A plain /events visit must
+  // not inherit an earlier organizer, conference, or QR campaign from storage.
+  // Other routes retain their existing last-touch behavior.
+  const merged = routeConfig?.dynamicOrganization ? { ...current } : mergeNonEmpty(stored, current);
+  const activeOrganizationSlug = routeConfig?.dynamicOrganization
+    ? (current.organization_slug || normalizeOrganizationSlug(current.organization_name)
+      || ORGANIZATION_CONFIGS.general.organization_slug)
+    : (routeConfig?.organization_slug || current.organization_slug || ORGANIZATION_CONFIGS.general.organization_slug);
   const activeOrganizationConfig = ORGANIZATION_CONFIGS[activeOrganizationSlug] || ORGANIZATION_CONFIGS.general;
 
-  merged.organization_slug = activeOrganizationConfig.organization_slug;
-  merged.organization_name = current.organization_name || activeOrganizationConfig.organization_name;
+  if (routeConfig?.dynamicOrganization) {
+    // Attribution accepts new organizers without changing the generic content.
+    merged.organization_slug = activeOrganizationSlug;
+    merged.organization_name = activeOrganizationSlug === "general"
+      ? ORGANIZATION_CONFIGS.general.organization_name
+      : (current.organization_name || ORGANIZATION_CONFIGS[activeOrganizationSlug]?.organization_name
+        || activeOrganizationSlug);
+  } else {
+    merged.organization_slug = activeOrganizationConfig.organization_slug;
+    merged.organization_name = current.organization_name || activeOrganizationConfig.organization_name;
+  }
   // A known route is authoritative for experiment assignment. This prevents
   // a stale query string or stored visit from changing the A/B variant.
   merged.landing_page_variant = routeConfig?.landing_page_variant

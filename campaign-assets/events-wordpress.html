@@ -1,0 +1,76 @@
+<!-- Replace the /events page's existing iframe AND tracking listener with this block. -->
+<iframe
+  id="tf-events-lp"
+  title="TerraFuse Events Landing Page"
+  style="width:100%; min-height:100vh; border:0;"
+  loading="eager">
+</iframe>
+
+<script>
+(function () {
+  var iframe = document.getElementById("tf-events-lp");
+  if (!iframe) return;
+
+  var origin = "https://landing-page-tf.vercel.app";
+  var incoming = new URLSearchParams(window.location.search);
+  var params = new URLSearchParams();
+  var forwardedKeys = [
+    "organization_slug", "organization_name", "tf_event", "tf_event_name",
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "utm_id"
+  ];
+  forwardedKeys.forEach(function (key) {
+    var value = incoming.get(key);
+    if (value && value.trim()) params.set(key, value.trim());
+  });
+  params.set("landing_page_variant", "events");
+  params.set("parent_path", window.location.pathname);
+  params.set("parent_url", window.location.href);
+
+  // The same snippet works for every organizer and conference.
+  // No campaign parameters are fabricated for plain /events visits.
+  var isQr = (params.get("utm_medium") || "").toLowerCase() === "qr";
+  var content = (params.get("utm_content") || "").toLowerCase();
+  var isBrochure = isQr && (content === "event_brochure" || content === "brochure_qr");
+  var isTagged = forwardedKeys.some(function (key) { return params.has(key); });
+  var entryMethod = isBrochure ? "qr_brochure" : (isQr ? "qr" : (isTagged ? "other_tagged" : "untagged"));
+  var eventNames = {
+    TF_LANDING_PAGE_VIEW: "tf_landing_page_view",
+    TF_FORM_STARTED: "tf_form_start",
+    TF_LEAD_SUBMITTED: "generate_lead"
+  };
+  var allowedKeys = [
+    "lead_organization", "lead_organization_name", "lead_event", "lead_event_name",
+    "landing_page_variant", "landing_page_path", "iframe_path",
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_id"
+  ];
+  var sentPageView = false;
+
+  function sendAnalytics(name, payload) {
+    // Reuse the Google tag installed by Site Kit.
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+    window.gtag("event", name, payload);
+  }
+
+  window.addEventListener("message", function (event) {
+    if (event.origin !== origin || event.source !== iframe.contentWindow || !event.data) return;
+    if (!Object.prototype.hasOwnProperty.call(eventNames, event.data.type)) return;
+    if (event.data.type === "TF_LANDING_PAGE_VIEW" && sentPageView) return;
+
+    var source = event.data.payload || {};
+    var payload = { entry_method: entryMethod };
+    allowedKeys.forEach(function (key) {
+      if (typeof source[key] === "string" && source[key]) payload[key] = source[key];
+    });
+    sendAnalytics(eventNames[event.data.type], payload);
+
+    if (event.data.type === "TF_LANDING_PAGE_VIEW") {
+      sentPageView = true;
+      if (isQr) sendAnalytics("tf_qr_landing_view", payload);
+    }
+  });
+
+  // Register the listener before the iframe can emit its first view event.
+  iframe.src = origin + "/events?" + params.toString();
+})();
+</script>

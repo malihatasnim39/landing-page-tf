@@ -5,7 +5,8 @@
   "description": "TerraFuse QStrata 2026 landing page for Cloud Run and WordPress iframe embedding.",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"

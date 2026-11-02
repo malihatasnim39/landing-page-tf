@@ -3,7 +3,7 @@ import {
   getAttribution,
   getAttributionMeta,
   getOrganizationConfig
-} from "./attribution.js?v=20260910a";
+} from "./attribution.js?v=20261102a";
 
 const root = document.documentElement;
 const toggle = document.querySelector(".theme-toggle");
@@ -150,7 +150,8 @@ function replaceSelectOptions(selector, options) {
 }
 
 function configureBuildingDetailsFields(config) {
-  const enabled = config.contentMode === "broad" || config.organization_slug === "sca_queensland";
+  const enabled = config.showBuildingDetails || config.contentMode === "broad"
+    || config.organization_slug === "sca_queensland";
   document.querySelectorAll("[data-building-details-field]").forEach((field) => {
     field.hidden = !enabled;
     const control = field.querySelector("input, select, textarea");
@@ -308,6 +309,10 @@ function applyOrganizationContent(config) {
   setMultilineText("[data-org-heading]", config.heading);
   setText("[data-org-subheadline]", config.subheadline);
   setText("[data-org-secondary-cta]", config.secondaryCta);
+  const secondaryCta = document.querySelector("[data-org-secondary-cta]");
+  if (secondaryCta) {
+    secondaryCta.hidden = !config.showSecondaryCta;
+  }
   setText("[data-org-section-eyebrow]", config.sectionEyebrow);
   setText("[data-org-section-heading]", config.sectionHeading);
   setText("[data-org-section-copy]", config.sectionCopy);
