@@ -134,6 +134,10 @@ function cleanLeadPayload(payload) {
   const landingPageVariant = cleanNullableString(payload.landing_page_variant, 120);
   const utmContent = cleanNullableString(payload.utm_content, 260);
   const isBroadCampaignLead = broadLandingPageVariants.has(landingPageVariant);
+  const isSharedEventsLead = landingPageVariant === "events"
+    && [payload.landing_page_path, payload.parent_path].some((value) => (
+      cleanString(value, 500).replace(/\/+$/, "") === "/events"
+    ));
   const suburb = cleanString(payload.suburb, 160);
   const role = cleanString(payload.role, 160);
   const message = cleanString(payload.note, 1500);
@@ -142,7 +146,11 @@ function cleanLeadPayload(payload) {
     `Role: ${role}`,
     `Message: ${message || "Not provided"}`
   ].join("\n");
-  const defaultEventName = cleanString(configuredEventName || payload.eventName || "TerraFuse Events", 160);
+  // The shared events page must not inherit a legacy EVENT_NAME or cached form name.
+  // Explicit trackingEventName still identifies named conferences.
+  const defaultEventName = isSharedEventsLead
+    ? "General"
+    : cleanString(configuredEventName || payload.eventName || "TerraFuse Events", 160);
   const lead = {
     organization_slug: cleanNullableString(payload.organization_slug, 120),
     organization_name: cleanNullableString(payload.organization_name, 160),

@@ -19,6 +19,12 @@ const conferenceParams = new URLSearchParams({
   tf_event: "management-rights-conference-2026-11-11",
   tf_event_name: "2026 Management Rights Conference"
 });
+const merchandiseParams = new URLSearchParams({
+  utm_source: "merchandise",
+  utm_medium: "qr",
+  utm_campaign: "generic_merchandise",
+  utm_content: "merchandise_qr"
+});
 
 function attributionClient() {
   const storage = new Map();
@@ -118,7 +124,8 @@ test("a plain events return resets earlier organizer, event, QR tags, and name m
   const { attribution: a, meta } = client.visit("/events");
   assert.equal(a.organization_slug, "general");
   assert.equal(a.organization_name, "TerraFuse Events");
-  for (const key of ["event_slug", "event_name", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_id"]) {
+  assert.equal(a.event_name, "General");
+  for (const key of ["event_slug", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_id"]) {
     assert.equal(a[key], null, key);
   }
   assert.equal(meta.eventNameSource, null);
@@ -203,18 +210,17 @@ test("embed ignores messages from another origin/window and unknown message type
   assert.equal(bridge.events().length, 0);
 });
 
-test("conference lead serialization preserves organization, event, suburb and role", () => {
-  const client = attributionClient();
-  const visit = client.visit("/events", conferenceParams);
+function serializeLead(visit, env = {}, formOverrides = {}) {
   const mainSource = fs.readFileSync(path.join(root, "public/main.js"), "utf8");
   const collectSource = mainSource.slice(mainSource.indexOf("function collectFormData("), mainSource.indexOf("async function submitLead("));
   const formValues = {
     fullName: "Form check", company: "Test building", email: "test@example.invalid",
-    eventName: "TerraFuse Events", suburb: "Sunnybank", role: "Strata Manager",
-    mainInterest: "EV charging", contactConsent: "yes", note: "Please follow up."
+    eventName: visit.content.defaultEventName, suburb: "Sunnybank", role: "Strata Manager",
+    mainInterest: "EV charging", contactConsent: "yes", note: "Please follow up.",
+    ...formOverrides
   };
   const context = vm.createContext({
-    require, __dirname: root, process: { env: {} }, console,
+    require, __dirname: root, process: { env }, console,
     attribution: visit.attribution, attributionMeta: visit.meta, organizationConfig: visit.content,
     FormData: class { entries() { return Object.entries(formValues); } }
   });
@@ -223,9 +229,63 @@ test("conference lead serialization preserves organization, event, suburb and ro
   const serverSource = fs.readFileSync(path.join(root, "server.js"), "utf8").split("const server = http.createServer")[0];
   vm.runInContext(serverSource, context);
   const { lead, error } = vm.runInContext("cleanLeadPayload(payload)", context);
+  return {
+    payload: context.payload,
+    lead,
+    error,
+    emailHtml: lead ? vm.runInContext("leadAttributionHtml(cleanLeadPayload(payload).lead)", context) : null
+  };
+}
+
+test("conference lead serialization preserves organization, event, suburb and role despite a legacy server default", () => {
+  const visit = attributionClient().visit("/events", conferenceParams);
+  const { lead, error } = serializeLead(visit, { EVENT_NAME: "QStrata 2026" });
   assert.equal(error, undefined);
   assert.equal(lead.organization_slug, "knowledge_bank_australia");
   assert.equal(lead.event_name, "2026 Management Rights Conference");
   assert.equal(lead.utm_campaign, conferenceParams.get("utm_campaign"));
   assert.equal(lead.note, "Suburb: Sunnybank\nRole: Strata Manager\nMessage: Please follow up.");
+});
+
+test("merchandise stays general through attribution, form, server and email after a conference visit", () => {
+  const client = attributionClient();
+  client.visit("/events", conferenceParams);
+  const bridge = embed(merchandiseParams);
+  const visit = client.visit("/events", bridge.iframeUrl.searchParams);
+  assert.equal(visit.attribution.organization_slug, "general");
+  assert.equal(visit.attribution.event_name, "General");
+  assert.equal(visit.attribution.event_slug, null);
+  assert.equal(visit.meta.eventNameSource, null);
+  assert.equal(visit.content.defaultEventName, "General");
+  const { payload, lead, error, emailHtml } = serializeLead(visit, { EVENT_NAME: "QStrata 2026" });
+  assert.equal(error, undefined);
+  assert.equal(payload.eventName, "General");
+  assert.equal(lead.event_name, "General");
+  assert.equal(lead.organization_slug, "general");
+  assert.equal(lead.event_slug, null);
+  for (const [key, value] of merchandiseParams) assert.equal(lead[key], value, key);
+  assert.match(emailHtml, />General</);
+  assert.doesNotMatch(emailHtml, /QStrata/);
+});
+
+test("shared event defaults override a cached form name but retain the legacy QStrata route default", () => {
+  for (const route of ["/events", "/events/"]) {
+    const visit = attributionClient().visit(route, merchandiseParams);
+    const { lead, error } = serializeLead(visit, { EVENT_NAME: "QStrata 2026" }, { eventName: "QStrata 2026" });
+    assert.equal(error, undefined);
+    assert.equal(lead.event_name, "General", route);
+    assert.equal(lead.utm_campaign, "generic_merchandise");
+  }
+  const legacy = serializeLead(attributionClient().visit("/qstrata"), { EVENT_NAME: "QStrata 2026" });
+  assert.equal(legacy.lead.event_name, "QStrata 2026");
+});
+
+test("plain events use General without a server override and broad campaigns retain their identity", () => {
+  const plain = serializeLead(attributionClient().visit("/events"));
+  assert.equal(plain.lead.event_name, "General");
+  for (const route of ["/building-solutions", "/building-solutions-review-first"]) {
+    const broad = serializeLead(attributionClient().visit(route, "utm_content=building_review_video"), { EVENT_NAME: "QStrata 2026" });
+    assert.equal(broad.lead.event_name, "brisbane-channel collab");
+    assert.equal(broad.lead.event_slug, "building-review");
+  }
 });

@@ -296,6 +296,7 @@ const ROUTE_CONFIGS = {
     eyebrow: "Knowledge Bank 2026 Management Right Conference",
     layout: "standard",
     dynamicOrganization: true,
+    defaultEventName: "General",
     showSecondaryCta: false,
     showBuildingDetails: true
   },
@@ -500,6 +501,10 @@ export function getAttribution() {
       ? ORGANIZATION_CONFIGS.general.organization_name
       : (current.organization_name || ORGANIZATION_CONFIGS[activeOrganizationSlug]?.organization_name
         || activeOrganizationSlug);
+    // Placement campaigns (such as merchandise) are not named events.
+    merged.event_name = eventNameSource === "tf_event_name"
+      ? current.event_name
+      : routeConfig.defaultEventName;
   } else {
     merged.organization_slug = activeOrganizationConfig.organization_slug;
     merged.organization_name = current.organization_name || activeOrganizationConfig.organization_name;

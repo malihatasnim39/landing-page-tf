@@ -30,12 +30,24 @@ https://terrafuse.com.au/events/?organization_slug=knowledge_bank_australia&orga
 | Organization name | `Knowledge Bank Australia` | `TerraFuse Events` |
 | Landing page variant | `events` | `events` |
 | Event slug | `management-rights-conference-2026-11-11` | No event slug |
-| Submitted lead event name | `2026 Management Rights Conference` | `TerraFuse Events` |
+| Submitted lead event name | `2026 Management Rights Conference` | `General` |
 | Entry method in GA4 | `qr_brochure` | `untagged` |
 
 The content remains generic even when the organizer is supplied. New organization slugs do not require a new app route or organization-specific page. Supply `organization_slug` and preferably `organization_name`; if only a name is supplied, the app derives a lowercase slug with spaces/hyphens replaced by underscores. If only a slug is supplied, a known organization's name is used where available, otherwise its slug is used as the label. If neither is supplied, attribution defaults to general.
 
 The /events route uses the current URL's tracking values. A later untagged visit resets organization to general and does not inherit an earlier organizer, event, or QR campaign. Other branded and Building Solutions routes retain their previous attribution behavior.
+
+## Generic merchandise QR
+
+Encode this destination for merchandise:
+
+```text
+https://terrafuse.com.au/events/?utm_source=merchandise&utm_medium=qr&utm_campaign=generic_merchandise&utm_content=merchandise_qr
+```
+
+Without `tf_event_name`, /events uses `General` as its event name in analytics, saved leads and enquiry emails. The organization slug is `general`, displayed as `TerraFuse Events`, and the event slug remains empty. Merchandise UTMs are retained separately; `generic_merchandise` is a campaign label, not an event name.
+
+Deploy the frontend and server changes together. Shared /events leads ignore a legacy `EVENT_NAME=QStrata 2026` setting and cached hidden form defaults; explicit `tf_event_name` values still identify named conferences. The WordPress iframe snippet and merchandise QR destination do not need to change. Existing saved leads and sent emails are not rewritten.
 
 ## Form and storage
 
