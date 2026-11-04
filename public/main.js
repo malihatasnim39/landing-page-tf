@@ -3,7 +3,7 @@ import {
   getAttribution,
   getAttributionMeta,
   getOrganizationConfig
-} from "./attribution.js?v=20261102a";
+} from "./attribution.js?v=20261104a";
 
 const root = document.documentElement;
 const toggle = document.querySelector(".theme-toggle");

@@ -450,9 +450,15 @@ export function getOrganizationConfig(attribution) {
   const routeConfig = getRouteConfig();
   const slug = routeConfig?.organization_slug || normalizeOrganizationSlug(attribution.organization_slug);
   const organizationConfig = ORGANIZATION_CONFIGS[slug] || ORGANIZATION_CONFIGS.general;
+  const isKnowledgeBankConference = routeConfig?.dynamicOrganization
+    && attribution.organization_slug === "knowledge_bank_australia"
+    && attribution.event_slug === "management-rights-conference-2026-11-11";
 
   return {
     ...organizationConfig,
+    eyebrow: isKnowledgeBankConference
+      ? "Knowledge Bank 2026 Management Right Conference"
+      : organizationConfig.eyebrow,
     landing_page_variant: routeConfig?.landing_page_variant || organizationConfig.landing_page_variant,
     layout: routeConfig?.layout || "standard",
     contentMode: routeConfig?.contentMode || "organization",
